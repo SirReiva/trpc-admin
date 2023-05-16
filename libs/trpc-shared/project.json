@@ -1,0 +1,17 @@
+{
+	"name": "trpc-shared",
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"sourceRoot": "libs/trpc-shared/src",
+	"projectType": "library",
+	"targets": {
+		"build": {
+			"executor": "nx:run-commands",
+			"options": {
+				"cwd": "libs/trpc-shared",
+				"commands": ["npx rimraf ../../dist/libs/trpc-shared", "npx ttsc"],
+				"parallel": false
+			}
+		}
+	},
+	"tags": ["node-lib"]
+}

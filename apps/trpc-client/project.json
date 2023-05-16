@@ -1,0 +1,30 @@
+{
+	"name": "trpc-client",
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"sourceRoot": "apps/trpc-client/src",
+	"projectType": "application",
+	"targets": {
+		"build": {
+			"executor": "nx:run-commands",
+			"options": {
+				"cwd": "apps/trpc-client",
+				"command": "cross-env NODE_ENV=production vite build"
+			}
+		},
+		"serve": {
+			"executor": "nx:run-commands",
+			"options": {
+				"cwd": "apps/trpc-client",
+				"command": "cross-env NODE_ENV=development npx vite"
+			}
+		},
+		"start": {
+			"executor": "nx:run-commands",
+			"options": {
+				"cwd": "apps/trpc-client",
+				"command": "cross-env NODE_ENV=production npx next start"
+			}
+		}
+	},
+	"tags": ["nextjs-app", "react", "trpc-client"]
+}

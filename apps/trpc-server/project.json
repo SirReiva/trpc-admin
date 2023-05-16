@@ -1,0 +1,47 @@
+{
+	"name": "trpc-server",
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"sourceRoot": "apps/trpc-server/src",
+	"projectType": "application",
+	"targets": {
+		"serve": {
+			"executor": "nx:run-commands",
+			"options": {
+				"cwd": "apps/trpc-server",
+				"command": "cross-env NODE_ENV=development npx nest start --watch -p tsconfig.app.json"
+			}
+		},
+		"build": {
+			"executor": "nx:run-commands",
+			"options": {
+				"cwd": "apps/trpc-server",
+				"commands": [
+					"npx rimraf ../../dist/apps/trpc-server",
+					"cross-env NODE_ENV=production npx nest build -p tsconfig.build.json"
+				],
+				"parallel": false
+			},
+			"dependsOn": [
+				{
+					"target": "build",
+					"projects": "dependencies"
+				}
+			]
+		},
+		"start": {
+			"executor": "nx:run-commands",
+			"options": {
+				"cwd": "dist/apps/trpc-server",
+				"command": "cross-env NODE_ENV=production node main"
+			}
+		},
+		"doc": {
+			"executor": "nx:run-commands",
+			"options": {
+				"cwd": "apps/trpc-server",
+				"command": "npx @compodoc/compodoc -p tsconfig.json -s -o --theme material -w"
+			}
+		}
+	},
+	"tags": ["nestjs-app", "trpc-server"]
+}
