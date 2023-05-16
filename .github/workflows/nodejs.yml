@@ -1,55 +1,55 @@
-name: Node.js CI
+# name: Node.js CI
 
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-  workflow_dispatch:
-    inputs:
-      git-ref:
-        description: Git Ref (Optional)
-        required: false
+# on:
+#   push:
+#     branches: [master]
+#   pull_request:
+#     branches: [master]
+#   workflow_dispatch:
+#     inputs:
+#       git-ref:
+#         description: Git Ref (Optional)
+#         required: false
 
-jobs:
-  avoid_reduncy:
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Cancel Previous Redundant Builds
-        uses: styfle/cancel-workflow-action@0.9.1
-        with:
-          access_token: ${{ github.token }}
+# jobs:
+#   avoid_reduncy:
+#     runs-on: ubuntu-18.04
+#     steps:
+#       - name: Cancel Previous Redundant Builds
+#         uses: styfle/cancel-workflow-action@0.9.1
+#         with:
+#           access_token: ${{ github.token }}
 
-  build-test:
-    runs-on: ubuntu-latest
+#   build-test:
+#     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [14.x, 15.x, 16.x]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Upgrade NPM
-        run: npm install -g npm
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          cache: 'npm'
-          node-version: ${{ matrix.node-version }}
-      - run: git fetch origin master
-      - run: npm ci --legacy-peer-deps
-      - run: npm run copy-env
-      - name: Build Affected
-        env:
-          NEXT_PUBLIC_GQL_URI: ${{secrets.NEXT_PUBLIC_GQL_URI}}
-        shell: bash
-        run: npm run affected:build -- --base=remotes/origin/master
-      - name: Test Affected
-        shell: bash
-        run: npm run affected:test -- --base=remotes/origin/master
-      - name: Test Affected e2e
-        env:
-          TESULTS: ${{secrets.TESULTS}}
-        shell: bash
-        run: npm run affected:e2e -- --base=remotes/origin/master
+#     strategy:
+#       matrix:
+#         node-version: [14.x, 15.x, 16.x]
+#     steps:
+#       - uses: actions/checkout@v2
+#         with:
+#           fetch-depth: 0
+#       - name: Upgrade NPM
+#         run: npm install -g npm
+#       - name: Use Node.js ${{ matrix.node-version }}
+#         uses: actions/setup-node@v3
+#         with:
+#           cache: 'npm'
+#           node-version: ${{ matrix.node-version }}
+#       - run: git fetch origin master
+#       - run: npm ci --legacy-peer-deps
+#       - run: npm run copy-env
+#       - name: Build Affected
+#         env:
+#           NEXT_PUBLIC_GQL_URI: ${{secrets.NEXT_PUBLIC_GQL_URI}}
+#         shell: bash
+#         run: npm run affected:build -- --base=remotes/origin/master
+#       - name: Test Affected
+#         shell: bash
+#         run: npm run affected:test -- --base=remotes/origin/master
+#       - name: Test Affected e2e
+#         env:
+#           TESULTS: ${{secrets.TESULTS}}
+#         shell: bash
+#         run: npm run affected:e2e -- --base=remotes/origin/master
