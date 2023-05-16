@@ -19,5 +19,8 @@ export interface Repository<T extends InferBaseModelType> {
 
 export interface AuthRepository<T extends InferBaseAuthModelType>
 	extends Repository<T> {
-	generateToken(data: T): MaybePromise<string>;
+	generateToken(
+		identifier: string,
+		password: string
+	): MaybePromise<{ token: string }>;
 }
