@@ -1,15 +1,15 @@
-import { createTRPCReact } from '@trpc/react-query';
 import type { AppRouter } from '@trpc-server/trpc/client';
+import { createTRPCReact } from '@trpc/react-query';
 
 export const trpc = createTRPCReact<AppRouter>();
-export type TrpcModels = Exclude<
-	keyof AppRouter,
+
+export type TrpcModels<T extends typeof trpc> = keyof Omit<
+	T,
 	| 'Provider'
 	| 'createClient'
 	| 'useContext'
 	| 'useDehydratedState'
 	| 'useQueries'
-	| '_def'
-	| 'createCaller'
-	| 'getErrorShape'
 >;
+
+//export type TrpcAuthModels<T extends typeof trpc> = keyof Pick<T, 'auth'>;

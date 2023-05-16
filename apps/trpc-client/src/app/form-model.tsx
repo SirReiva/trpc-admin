@@ -14,7 +14,10 @@ const mapping = [
 ] as const;
 const Form = createTsForm(mapping);
 
-const buildNewFormModel = (model: BaseModelType, name: TrpcModels) => {
+const buildNewFormModel = (
+	model: BaseModelType,
+	name: TrpcModels<typeof trpc>
+) => {
 	const idLessModel = model.omit({ id: true });
 	return () => {
 		const navigate = useNavigate();
