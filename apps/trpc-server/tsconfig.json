@@ -1,7 +1,10 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		"outDir": "../../dist/apps/trpc-server"
+		"outDir": "../../dist/apps/trpc-server",
+		"paths": {
+			"@trpc-shared/*": ["dist/libs/trpc-shared/*"]
+		}
 	},
 	"exclude": ["node_modules"],
 	"include": ["**/*.ts"]

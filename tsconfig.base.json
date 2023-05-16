@@ -20,11 +20,6 @@
 		"baseUrl": "./",
 		"esModuleInterop": true,
 		"moduleResolution": "node",
-		"paths": {
-			"@trpc-server/*": ["apps/trpc-server/src/*"],
-			"@trpc-client/*": ["apps/trpc-client/src/*"],
-			"@trpc-shared/*": ["libs/trpc-shared/src/*"]
-		},
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,

@@ -1,7 +1,7 @@
-import { Repository } from '@trpc-server/trpc/repository';
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
 import { MaybePromise } from '@trpc/server';
 import { z } from 'zod';
+import { Repository } from '../trpc/repository';
 
 export const buildInMemoryRepository = <T extends BaseModelType>() => {
 	let store: z.infer<T>[] = [];

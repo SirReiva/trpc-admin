@@ -26,5 +26,5 @@
 			}
 		}
 	},
-	"tags": ["nextjs-app", "react", "trpc-client"]
+	"tags": ["trpc-client"]
 }

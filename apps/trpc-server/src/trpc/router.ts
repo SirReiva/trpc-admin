@@ -4,7 +4,7 @@ import { User } from '@trpc-shared/models/User';
 import { AuthContextType } from './context';
 import { Repository } from './repository';
 import { z } from 'zod';
-import { buildInMemoryRepository } from '@trpc-server/test/InMemoryRepositories';
+import { buildInMemoryRepository } from '../test/InMemoryRepositories';
 
 const t = initTRPC.context<AuthContextType>().create();
 
