@@ -1,18 +1,23 @@
-import { initTRPC } from '@trpc/server';
+import { BaseAuthModelType } from '@trpc-shared/models/BaseAuthModel';
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
 import { User } from '@trpc-shared/models/User';
-import { AuthContextType } from './context';
-import { Repository } from './repository';
+import { Post } from '@trpc-shared/models/Post';
+import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
-import { buildInMemoryRepository } from '../test/InMemoryRepositories';
+import {
+	buildInMemoryAuthRepository,
+	buildInMemoryRepository,
+} from '../test/InMemoryRepositories';
+import { AuthContextType } from './context';
+import { AuthRepository, Repository } from './repository';
 
 const t = initTRPC.context<AuthContextType>().create();
 
-export const buildModelrouter = <T extends BaseModelType>(
+const proceduresBuilder = <T extends BaseModelType>(
 	model: T,
-	repository: Repository<z.infer<T>>
+	repository: Repository<z.TypeOf<T>>
 ) => {
-	return t.router({
+	return {
 		create: t.procedure
 			.input(model)
 			.output(z.void())
@@ -59,8 +64,20 @@ export const buildModelrouter = <T extends BaseModelType>(
 				})
 			)
 			.query(({ input }) => repository.list(input.page, input.pageSize)),
-	});
+	};
 };
+
+const buildModelrouter = <T extends BaseModelType>(
+	model: T,
+	repository: Repository<z.infer<T>>
+) => t.router(proceduresBuilder<T>(model, repository));
+
+const buildAuthModel = <T extends BaseAuthModelType>(
+	model: T,
+	repository: AuthRepository<z.infer<T>>
+) => ({
+	...buildModelrouter(model, repository),
+});
 
 type ResultRouteModel<T extends BaseModelType> = ReturnType<
 	typeof buildModelrouter<T>
@@ -90,13 +107,15 @@ const buildModelsRouter = <T extends RouterMoldesBuilder>(
 	);
 };
 
-const UserClassRepo = buildInMemoryRepository<typeof User>();
+const PostClassRepo = buildInMemoryRepository<typeof Post>();
+const AuthClassRepo = buildInMemoryAuthRepository<typeof User>();
 
-export const appRouter = t.router(
-	buildModelsRouter({
-		user: {
-			model: User,
-			repository: new UserClassRepo(),
+export const appRouter = t.router({
+	...buildModelsRouter({
+		post: {
+			model: Post,
+			repository: new PostClassRepo(),
 		},
-	})
-);
+	}),
+	auth: buildAuthModel(User, new AuthClassRepo()),
+});

@@ -1,10 +1,17 @@
-import { PasswordSchema } from '@trpc-shared/utils/schemas';
 import { z } from 'zod';
+import { PasswordSchema } from '../utils/schemas';
+
+export enum ROLES {
+	ADMIN = 'ADMIN',
+	WRITTER = 'WRITTER',
+	READER = 'READER',
+}
 
 export const BaseAuthModel = z.object({
 	id: z.string().uuid(),
 	identifier: z.string(),
 	password: PasswordSchema,
+	role: z.nativeEnum(ROLES),
 });
 
 export type BaseAuthModelType = typeof BaseAuthModel;

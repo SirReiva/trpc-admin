@@ -10,7 +10,7 @@ import { TrpcModels, trpc } from './trpc';
 
 export const createClient = (
 	baseUrl: string,
-	linksConfig: Record<TrpcModels<typeof trpc>, boolean>
+	linksConfig: Record<TrpcModels, boolean>
 ) => {
 	return trpc.createClient({
 		links: [
@@ -19,8 +19,8 @@ export const createClient = (
 			}),
 			splitLink({
 				condition(op: Operation) {
-					const model = op.path.split('.').shift() as TrpcModels<typeof trpc>;
-					return linksConfig[model];
+					const model = op.path.split('.').shift() as TrpcModels;
+					return linksConfig[model] ?? false;
 				},
 				false: httpBatchLink({
 					url: 'http:' + baseUrl,

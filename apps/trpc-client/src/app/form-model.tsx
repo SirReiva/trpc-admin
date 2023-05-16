@@ -15,10 +15,7 @@ const mapping = [
 ] as const;
 const Form = createTsForm(mapping);
 
-const buildNewFormModel = (
-	model: BaseModelType,
-	name: TrpcModels<typeof trpc>
-) => {
+const buildNewFormModel = (model: BaseModelType, name: TrpcModels) => {
 	const idLessModel = model.omit({ id: true });
 	return () => {
 		const navigate = useNavigate();
@@ -31,7 +28,7 @@ const buildNewFormModel = (
 				id: uuid(),
 				...data,
 			});
-			navigate('/admin/' + name);
+			// navigate('/admin/' + name);
 		}
 		const props = Object.entries(idLessModel.shape).reduce((acc, [name]) => {
 			return {

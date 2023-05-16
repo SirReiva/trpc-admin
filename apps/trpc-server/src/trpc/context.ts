@@ -1,22 +1,11 @@
+import { ROLES } from '@trpc-shared/models/BaseAuthModel';
+import { verifyJWT } from '@trpc-shared/utils/jwt';
 import { inferAsyncReturnType } from '@trpc/server';
 import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
-import { verify, VerifyOptions } from 'jsonwebtoken';
-
-const verifyAsync = <T extends object = any>(
-	token: string,
-	secret: string,
-	options?: VerifyOptions & { complete: true }
-): Promise<T> => {
-	return new Promise<T>((resolve, reject) =>
-		verify(token, secret, options, (err, decoded) =>
-			err ? reject(err) : resolve(decoded as T)
-		)
-	);
-};
 
 export interface AuthContext {
-	id: string;
-	role: string;
+	identifier: string;
+	role: ROLES;
 }
 
 export const createContext = async ({
@@ -26,7 +15,7 @@ export const createContext = async ({
 	const token = req.headers.authorization;
 	let auth: AuthContext | undefined;
 	if (token) {
-		auth = await verifyAsync<AuthContext>(token, '').catch(() => undefined);
+		auth = await verifyJWT<AuthContext>(token, 'ZASCA').catch(() => undefined);
 	}
 
 	return { req, res, auth };

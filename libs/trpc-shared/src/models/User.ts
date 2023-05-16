@@ -1,8 +1,8 @@
-import { PasswordSchema } from '@trpc-shared/utils/schemas';
 import { z } from 'zod';
+import { PasswordSchema } from '../utils/schemas';
+import { BaseAuthModel } from './BaseAuthModel';
 
-export const User = z.object({
-	id: z.string().uuid(),
+export const User = BaseAuthModel.extend({
 	name: z.string().min(4),
 	password: PasswordSchema,
 });

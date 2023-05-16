@@ -2,12 +2,10 @@ import { BaseModelType } from '@trpc-shared/models/BaseModel';
 import { typedObjectEntries } from '@trpc-shared/utils/object';
 import { createBrowserRouter } from 'react-router-dom';
 import buildNewFormModel from './app/form-model';
-import { TrpcModels, trpc } from './trpc';
 import Login from './app/pages/login';
+import { TrpcModels } from './trpc';
 
-export const buildRouter = (
-	models: Record<TrpcModels<typeof trpc>, BaseModelType>
-) => {
+export const buildRouter = (models: Record<TrpcModels, BaseModelType>) => {
 	return createBrowserRouter(
 		typedObjectEntries(models)
 			.map(([name, model]) => [

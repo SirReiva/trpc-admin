@@ -3,8 +3,8 @@ import { createTRPCReact } from '@trpc/react-query';
 
 export const trpc = createTRPCReact<AppRouter>();
 
-export type TrpcModels<T extends typeof trpc> = keyof Omit<
-	T,
+export type TrpcModels = keyof Omit<
+	typeof trpc,
 	| 'Provider'
 	| 'createClient'
 	| 'useContext'
