@@ -4,6 +4,7 @@ import { User } from '@trpc-shared/models/User';
 import { AuthContextType } from './context';
 import { Repository } from './repository';
 import { z } from 'zod';
+import { buildInMemoryRepository } from '@trpc-server/test/InMemoryRepositories';
 
 const t = initTRPC.context<AuthContextType>().create();
 
@@ -83,17 +84,19 @@ const buildModelsRouter = <T extends RouterMoldesBuilder>(
 	return Object.entries(rMb).reduce(
 		(acc, [key, item]) => ({
 			...acc,
-			[key]: item,
+			[key]: buildModelrouter(item.model, item.repository),
 		}),
 		{} as BuildType<T>
 	);
 };
 
+const UserClassRepo = buildInMemoryRepository<typeof User>();
+
 export const appRouter = t.router(
 	buildModelsRouter({
 		user: {
 			model: User,
-			repository: {} as any,
+			repository: new UserClassRepo(),
 		},
 	})
 );

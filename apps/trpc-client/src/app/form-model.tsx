@@ -1,15 +1,16 @@
 import { createTsForm } from '@ts-react/form';
 import { type BaseModelType } from '@trpc-shared/models/BaseModel';
 import { z } from 'zod';
-import TextField from '../components/TextField';
-import { TrpcModels, trpc } from '../client';
+import TextField from './components/TextField';
 import uuid from 'uuid-random';
-import PasswordField from '../components/PasswordField';
+import PasswordField from './components/PasswordField';
 import { UseTRPCMutationResult } from '@trpc/react-query/dist/shared';
 import { useNavigate } from 'react-router-dom';
+import { TrpcModels, trpc } from '../trpc';
+import { PasswordSchema } from '@trpc-shared/utils/schemas';
 
 const mapping = [
-	[z.string().describe('password'), PasswordField],
+	[PasswordSchema, PasswordField],
 	[z.string(), TextField],
 ] as const;
 const Form = createTsForm(mapping);

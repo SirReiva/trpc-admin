@@ -4,6 +4,7 @@ import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import fastify from 'fastify';
 import { getFastifyPlugin } from 'trpc-playground/handlers/fastify';
 import { appRouter } from './trpc/router';
+import figlet from 'figlet';
 
 const TRPC_ENDPOINT = '/trpc';
 const TRPC_PLAYGROUND_ENDPOINT = '/playground';
@@ -16,11 +17,17 @@ const server = fastify({
 	try {
 		await server.register(ws);
 		await server.register(cors);
+
 		await server.register(fastifyTRPCPlugin, {
-			prefix: TRPC_ENDPOINT,
+			prefix: TRPC_ENDPOINT + '-socket',
 			trpcOptions: { router: appRouter },
 			useWSS: true,
 		});
+		await server.register(fastifyTRPCPlugin, {
+			prefix: TRPC_ENDPOINT,
+			trpcOptions: { router: appRouter },
+		});
+
 		await server.register(
 			await getFastifyPlugin({
 				router: appRouter,
@@ -33,7 +40,7 @@ const server = fastify({
 		);
 		await server.ready();
 		await server.listen({ port: 3000 });
-		console.log('LISTEN');
+		figlet('TRPC-SERVER\n---ready---', (_, r) => console.log(r));
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);

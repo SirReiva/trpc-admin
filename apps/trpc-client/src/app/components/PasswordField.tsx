@@ -35,7 +35,7 @@ const PasswordField = (props: {
 					onChange(e.target.value);
 				}}
 				id={name}
-				className={`block w-full p-2.5 text-sm rounded-lg ${inputClass}`}
+				className={`block w-full p-2.5 text-sm rounded-lg placeholder:capitalize ${inputClass}`}
 				placeholder={placeholder}
 			/>
 			{!!error && (

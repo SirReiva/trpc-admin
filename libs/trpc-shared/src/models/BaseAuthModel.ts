@@ -1,9 +1,10 @@
+import { PasswordSchema } from '@trpc-shared/utils/schemas';
 import { z } from 'zod';
 
 export const BaseAuthModel = z.object({
 	id: z.string().uuid(),
 	identifier: z.string(),
-	password: z.string().min(4).describe('password'),
+	password: PasswordSchema,
 });
 
 export type BaseAuthModelType = typeof BaseAuthModel;

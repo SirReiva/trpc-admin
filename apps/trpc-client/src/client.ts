@@ -1,15 +1,36 @@
-import type { AppRouter } from '@trpc-server/trpc/client';
-import { createTRPCReact } from '@trpc/react-query';
+import {
+	Operation,
+	createWSClient,
+	httpBatchLink,
+	loggerLink,
+	splitLink,
+	wsLink,
+} from '@trpc/client';
+import { TrpcModels, trpc } from './trpc';
 
-export const trpc = createTRPCReact<AppRouter>();
-
-export type TrpcModels<T extends typeof trpc> = keyof Omit<
-	T,
-	| 'Provider'
-	| 'createClient'
-	| 'useContext'
-	| 'useDehydratedState'
-	| 'useQueries'
->;
-
-//export type TrpcAuthModels<T extends typeof trpc> = keyof Pick<T, 'auth'>;
+export const createClient = (
+	baseUrl: string,
+	linksConfig: Record<TrpcModels<typeof trpc>, boolean>
+) => {
+	return trpc.createClient({
+		links: [
+			loggerLink({
+				enabled: _opts => process.env.NODE_ENV === 'development',
+			}),
+			splitLink({
+				condition(op: Operation) {
+					const model = op.path.split('.').shift() as TrpcModels<typeof trpc>;
+					return linksConfig[model];
+				},
+				false: httpBatchLink({
+					url: 'http:' + baseUrl,
+				}),
+				true: wsLink({
+					client: createWSClient({
+						url: 'ws:' + baseUrl + '-socket',
+					}),
+				}),
+			}),
+		],
+	});
+};
