@@ -1,19 +1,31 @@
-import { VerifyErrors, sign, verify } from 'jsonwebtoken';
+import { SignJWT, jwtVerify, decodeJwt } from 'jose';
+import { ROLES } from '../models/BaseAuthModel';
 
-export const signJWT = (payload: object, key: string): Promise<string> => {
-	return new Promise((res, rej) => {
-		sign(payload, key, (err: Error | null, encoded: string | undefined) => {
-			if (err) return rej(err);
-			res(encoded as string);
-		});
-	});
+export interface TokenPayload {
+	identifier: string;
+	role: ROLES;
+}
+
+export const signJWT = (
+	payload: TokenPayload,
+	key: string
+): Promise<string> => {
+	const jwtSign = new SignJWT(payload as any);
+	return jwtSign
+		.setProtectedHeader({ alg: 'HS256' })
+		.setExpirationTime('24h')
+		.sign(Buffer.from(key));
 };
 
-export const verifyJWT = <T>(token: string, key: string): Promise<T> => {
-	return new Promise((res, rej) => {
-		verify(token, key, (err: VerifyErrors | null, decoded: any | undefined) => {
-			if (err) return rej(err);
-			res(decoded);
-		});
-	});
+export const verifyJWT = (
+	token: string,
+	key: string
+): Promise<TokenPayload> => {
+	return jwtVerify(token, Buffer.from(key)).then(
+		data => data.payload as any as TokenPayload
+	);
+};
+
+export const decodeJWT = (token: string): TokenPayload => {
+	return decodeJwt(token) as any as TokenPayload;
 };

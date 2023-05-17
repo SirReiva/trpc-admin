@@ -1,1 +1,1 @@
-export const unused = 0;
+import 'zod-metadata/register';

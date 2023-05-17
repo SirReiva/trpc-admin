@@ -1,31 +1,59 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { User } from '@trpc-shared/models/User';
 import { Post } from '@trpc-shared/models/Post';
-import { useState } from 'react';
-import { RouterProvider } from 'react-router-dom';
+import { User } from '@trpc-shared/models/User';
+import { useMemo } from 'react';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { createClient } from '../client';
 import { buildRouter } from '../router';
-import { trpc } from '../trpc';
+import { TrpcProvider } from '../trpc';
+import { useAuth } from './context/authContext';
+import Index from './pages';
+import Admin from './pages/admin';
+import Login from './pages/login';
+import { withAuth } from './hoc/withAuth';
 
-const router = buildRouter({
+const routes = buildRouter({
 	auth: User,
 	post: Post,
 });
 
 const App = () => {
-	const [queryClient] = useState(() => new QueryClient());
-	const [trpcClient] = useState(() =>
-		createClient('//localhost:3000/trpc', {
-			post: false,
-			auth: false,
-		})
+	const { auth } = useAuth();
+	const queryClient = useMemo(() => new QueryClient(), [auth?.token]);
+	const trpcClient = useMemo(
+		() =>
+			createClient(
+				'//localhost:3000/trpc',
+				{
+					post: false,
+					auth: false,
+				},
+				auth?.token
+			),
+		[auth?.token]
 	);
+
 	return (
-		<trpc.Provider client={trpcClient} queryClient={queryClient}>
+		<TrpcProvider client={trpcClient} queryClient={queryClient}>
 			<QueryClientProvider client={queryClient}>
-				<RouterProvider router={router}></RouterProvider>
+				<RouterProvider
+					router={createBrowserRouter([
+						{
+							index: true,
+							Component: Index,
+						},
+						{
+							path: 'admin',
+							Component: withAuth(Admin),
+							children: routes,
+						},
+						{
+							path: 'login',
+							Component: Login,
+						},
+					])}></RouterProvider>
 			</QueryClientProvider>
-		</trpc.Provider>
+		</TrpcProvider>
 	);
 };
 

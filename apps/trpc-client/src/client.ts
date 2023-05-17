@@ -31,7 +31,9 @@ export const createClient = (
 				}),
 				true: wsLink({
 					client: createWSClient({
-						url: `ws:${baseUrl}-socket${token ? '?token=' + token : ''}`,
+						url: `ws:${baseUrl}-socket${
+							token ? '?token=' + encodeURIComponent(token) : ''
+						}`,
 					}),
 				}),
 			}),

@@ -12,4 +12,6 @@ export type TrpcModels = keyof Omit<
 	| 'useQueries'
 >;
 
+export const TrpcProvider = trpc.Provider;
+
 //export type TrpcAuthModels<T extends typeof trpc> = keyof Pick<T, 'auth'>;

@@ -1,27 +1,20 @@
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
 import { typedObjectEntries } from '@trpc-shared/utils/object';
-import { createBrowserRouter } from 'react-router-dom';
-import buildNewFormModel from './app/form-model';
-import Login from './app/pages/login';
+import bulidListModel from './app/list-model';
+import buildNewFormModel from './app/new-form-model';
 import { TrpcModels } from './trpc';
 
 export const buildRouter = (models: Record<TrpcModels, BaseModelType>) => {
-	return createBrowserRouter(
-		typedObjectEntries(models)
-			.map(([name, model]) => [
-				{
-					path: `/admin/${name.toString()}/new`,
-					Component: buildNewFormModel(model, name),
-				},
-			])
-			.reduce(
-				(acc, item) => [...acc, ...item],
-				[
-					{
-						path: '/login',
-						Component: Login,
-					},
-				]
-			)
-	);
+	return typedObjectEntries(models)
+		.map(([name, model]) => [
+			{
+				path: `${name.toString()}/new`,
+				Component: buildNewFormModel(model, name),
+			},
+			{
+				path: `${name.toString()}`,
+				Component: bulidListModel(model, name),
+			},
+		])
+		.reduce((acc, item) => [...acc, ...item], []);
 };

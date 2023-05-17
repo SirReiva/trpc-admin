@@ -1,3 +1,4 @@
+import 'zod-metadata/register';
 import cors from '@fastify/cors';
 import ws from '@fastify/websocket';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
@@ -16,8 +17,8 @@ const server = fastify({
 
 (async () => {
 	try {
-		await server.register(ws);
 		await server.register(cors);
+		await server.register(ws);
 
 		await server.register(fastifyTRPCPlugin, {
 			prefix: TRPC_ENDPOINT + '-socket',

@@ -1,7 +1,10 @@
 import { ROLES } from '@trpc-shared/models/BaseAuthModel';
-import { verifyJWT } from '@trpc-shared/utils/jwt';
+import { TokenPayload, verifyJWT } from '@trpc-shared/utils/jwt';
 import { inferAsyncReturnType } from '@trpc/server';
 import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
+import { CreateWSSContextFnOptions } from '@trpc/server/adapters/ws';
+import { IncomingMessage } from 'http';
+import { parse } from 'url';
 
 export interface AuthContext {
 	identifier: string;
@@ -11,11 +14,17 @@ export interface AuthContext {
 export const createContext = async ({
 	req,
 	res,
-}: CreateFastifyContextOptions) => {
-	const token = req.headers.authorization;
-	let auth: AuthContext | undefined;
+}: CreateFastifyContextOptions | CreateWSSContextFnOptions) => {
+	let token: string | undefined;
+	if (req instanceof IncomingMessage) {
+		const query = parse(req.url || '/', true).query;
+		token = query.token as string | undefined;
+	} else {
+		token = req.headers.authorization;
+	}
+	let auth: TokenPayload | undefined;
 	if (token) {
-		auth = await verifyJWT<AuthContext>(token, 'ZASCA').catch(() => undefined);
+		auth = await verifyJWT(token, 'ZASCA').catch(() => undefined);
 	}
 
 	return { req, res, auth };

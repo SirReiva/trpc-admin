@@ -2,7 +2,6 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"noEmit": true,
-		"strict": false,
 		"jsx": "preserve",
 		"incremental": true,
 		"noImplicitReturns": false,
