@@ -77,6 +77,12 @@ const buildAuthModel = <T extends BaseAuthModelType>(
 	repository: AuthRepository<z.infer<T>>
 ) => ({
 	...buildModelrouter(model, repository),
+	login: t.procedure
+		.input(model.pick({ identifier: true, password: true }))
+		.output(z.object({ token: z.string() }))
+		.mutation(({ input }) =>
+			repository.generateToken(input.identifier, input.password)
+		),
 });
 
 type ResultRouteModel<T extends BaseModelType> = ReturnType<

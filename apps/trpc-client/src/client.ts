@@ -10,7 +10,8 @@ import { TrpcModels, trpc } from './trpc';
 
 export const createClient = (
 	baseUrl: string,
-	linksConfig: Record<TrpcModels, boolean>
+	linksConfig: Record<TrpcModels, boolean>,
+	token?: string
 ) => {
 	return trpc.createClient({
 		links: [
@@ -20,14 +21,17 @@ export const createClient = (
 			splitLink({
 				condition(op: Operation) {
 					const model = op.path.split('.').shift() as TrpcModels;
-					return linksConfig[model] ?? false;
+					return op.type === 'subscription' || (linksConfig[model] ?? false);
 				},
 				false: httpBatchLink({
 					url: 'http:' + baseUrl,
+					headers: () => ({
+						Authorization: token,
+					}),
 				}),
 				true: wsLink({
 					client: createWSClient({
-						url: 'ws:' + baseUrl + '-socket',
+						url: `ws:${baseUrl}-socket${token ? '?token=' + token : ''}`,
 					}),
 				}),
 			}),

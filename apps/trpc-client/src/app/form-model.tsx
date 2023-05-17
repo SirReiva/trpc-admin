@@ -1,13 +1,12 @@
-import { createTsForm } from '@ts-react/form';
 import { type BaseModelType } from '@trpc-shared/models/BaseModel';
-import { z } from 'zod';
-import TextField from './components/TextField';
-import uuid from 'uuid-random';
-import PasswordField from './components/PasswordField';
-import { UseTRPCMutationResult } from '@trpc/react-query/dist/shared';
-import { useNavigate } from 'react-router-dom';
-import { TrpcModels, trpc } from '../trpc';
 import { PasswordSchema } from '@trpc-shared/utils/schemas';
+import { createTsForm } from '@ts-react/form';
+import { useNavigate } from 'react-router-dom';
+import uuid from 'uuid-random';
+import { z } from 'zod';
+import { TrpcModels, trpc } from '../trpc';
+import PasswordField from './components/PasswordField';
+import TextField from './components/TextField';
 
 const mapping = [
 	[PasswordSchema, PasswordField],
@@ -19,16 +18,14 @@ const buildNewFormModel = (model: BaseModelType, name: TrpcModels) => {
 	const idLessModel = model.omit({ id: true });
 	return () => {
 		const navigate = useNavigate();
-		const modelCreator = trpc[
-			name
-		].create.useMutation() as UseTRPCMutationResult<any, any, any, any>;
+		const modelCreator = trpc[name].create.useMutation();
 
 		async function onSubmit(data: any) {
 			await modelCreator.mutateAsync({
 				id: uuid(),
 				...data,
 			});
-			// navigate('/admin/' + name);
+			navigate('/admin/' + name);
 		}
 		const props = Object.entries(idLessModel.shape).reduce((acc, [name]) => {
 			return {

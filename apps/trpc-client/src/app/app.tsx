@@ -16,8 +16,8 @@ const App = () => {
 	const [queryClient] = useState(() => new QueryClient());
 	const [trpcClient] = useState(() =>
 		createClient('//localhost:3000/trpc', {
-			post: true,
-			auth: true,
+			post: false,
+			auth: false,
 		})
 	);
 	return (

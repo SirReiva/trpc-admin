@@ -5,6 +5,7 @@ import fastify from 'fastify';
 import { getFastifyPlugin } from 'trpc-playground/handlers/fastify';
 import { appRouter } from './trpc/router';
 import figlet from 'figlet';
+import { createContext } from './trpc/context';
 
 const TRPC_ENDPOINT = '/trpc';
 const TRPC_PLAYGROUND_ENDPOINT = '/playground';
@@ -20,12 +21,14 @@ const server = fastify({
 
 		await server.register(fastifyTRPCPlugin, {
 			prefix: TRPC_ENDPOINT + '-socket',
-			trpcOptions: { router: appRouter },
+			trpcOptions: { router: appRouter, createContext },
+			logLevel: 'debug',
 			useWSS: true,
 		});
 		await server.register(fastifyTRPCPlugin, {
 			prefix: TRPC_ENDPOINT,
-			trpcOptions: { router: appRouter },
+			trpcOptions: { router: appRouter, createContext },
+			logLevel: 'debug',
 		});
 
 		await server.register(
