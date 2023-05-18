@@ -10,14 +10,48 @@ import {
 } from '../test/InMemoryRepositories';
 import { AuthContextType } from './context';
 import { AuthRepository, Repository } from './repository';
+import { observable } from '@trpc/server/observable';
 
 const t = initTRPC.context<AuthContextType>().create();
 
 const proceduresBuilder = <T extends BaseModelType>(
 	model: T,
-	repository: Repository<z.TypeOf<T>>
+	repository: Repository<z.infer<T>>
 ) => {
 	return {
+		onCreate: t.procedure.subscription(() => {
+			return observable<z.infer<T>>(emit => {
+				const onAdd = (data: z.infer<T>) => {
+					emit.next(data);
+				};
+				repository.events.on('onCreate', onAdd);
+				return () => {
+					repository.events.off('onCreate', onAdd);
+				};
+			});
+		}),
+		onUpdate: t.procedure.subscription(() => {
+			return observable<z.infer<T>>(emit => {
+				const onAdd = (data: z.infer<T>) => {
+					emit.next(data);
+				};
+				repository.events.on('onUpdate', onAdd);
+				return () => {
+					repository.events.off('onUpdate', onAdd);
+				};
+			});
+		}),
+		onDelete: t.procedure.subscription(() => {
+			return observable<z.infer<T>>(emit => {
+				const onAdd = (data: z.infer<T>) => {
+					emit.next(data);
+				};
+				repository.events.on('onDelete', onAdd);
+				return () => {
+					repository.events.off('onDelete', onAdd);
+				};
+			});
+		}),
 		create: t.procedure
 			.input(model)
 			.output(z.void())

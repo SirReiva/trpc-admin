@@ -1,7 +1,7 @@
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
-import { TrpcModels, trpc } from '../trpc';
 import { typedObjectEntries } from '@trpc-shared/utils/object';
-import { useTable } from 'react-table';
+import { usePagination, useTable } from 'react-table';
+import { TrpcModels, trpc } from '../trpc';
 
 const Table = ({
 	columns,
@@ -11,10 +11,13 @@ const Table = ({
 	data: Array<any>;
 }) => {
 	const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-		useTable({
-			columns,
-			data,
-		});
+		useTable(
+			{
+				columns,
+				data,
+			},
+			usePagination
+		);
 	return (
 		<div className='shadow overflow-x-auto overflow-y-hidden rounded-md'>
 			<table className='min-w-full divide-y' {...getTableProps()}>

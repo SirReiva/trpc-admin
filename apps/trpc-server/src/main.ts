@@ -23,13 +23,11 @@ const server = fastify({
 		await server.register(fastifyTRPCPlugin, {
 			prefix: TRPC_ENDPOINT + '-socket',
 			trpcOptions: { router: appRouter, createContext },
-			logLevel: 'debug',
 			useWSS: true,
 		});
 		await server.register(fastifyTRPCPlugin, {
 			prefix: TRPC_ENDPOINT,
 			trpcOptions: { router: appRouter, createContext },
-			logLevel: 'debug',
 		});
 
 		await server.register(

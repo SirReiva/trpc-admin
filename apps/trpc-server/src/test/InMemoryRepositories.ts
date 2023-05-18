@@ -4,10 +4,12 @@ import { z } from 'zod';
 import { AuthRepository, Repository } from '../trpc/repository';
 import { BaseAuthModelType } from '@trpc-shared/models/BaseAuthModel';
 import { signJWT } from '@trpc-shared/utils/jwt';
+import EventEmitter from 'events';
 
 export const buildInMemoryRepository = <T extends BaseModelType>() => {
 	let store: z.infer<T>[] = [];
 	return class implements Repository<z.infer<T>> {
+		events = new EventEmitter();
 		create(data: z.infer<T>): MaybePromise<void> {
 			store.push(data);
 		}
@@ -43,6 +45,7 @@ export const buildInMemoryRepository = <T extends BaseModelType>() => {
 export const buildInMemoryAuthRepository = <T extends BaseAuthModelType>() => {
 	let store: z.infer<T>[] = [];
 	return class implements AuthRepository<z.infer<T>> {
+		events = new EventEmitter();
 		create(data: z.infer<T>): MaybePromise<void> {
 			store.push(data);
 		}
