@@ -1,7 +1,5 @@
 import { BaseAuthModelType } from '@trpc-shared/models/BaseAuthModel';
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
-import { User } from '@trpc-shared/models/User';
-import { Post } from '@trpc-shared/models/Post';
 import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
 import {
@@ -11,6 +9,9 @@ import {
 import { AuthContextType } from './context';
 import { AuthRepository, Repository } from './repository';
 import { observable } from '@trpc/server/observable';
+import { models } from '@trpc-shared/models';
+import mapMergeObject from 'just-merge';
+import mapMapObject from 'just-map-object';
 
 const t = initTRPC.context<AuthContextType>().create();
 
@@ -101,16 +102,10 @@ const proceduresBuilder = <T extends BaseModelType>(
 	};
 };
 
-const buildModelrouter = <T extends BaseModelType>(
-	model: T,
-	repository: Repository<z.infer<T>>
-) => t.router(proceduresBuilder<T>(model, repository));
-
-const buildAuthModel = <T extends BaseAuthModelType>(
+const buildLoginProcedure = <T extends BaseAuthModelType>(
 	model: T,
 	repository: AuthRepository<z.infer<T>>
 ) => ({
-	...buildModelrouter(model, repository),
 	login: t.procedure
 		.input(model.pick({ identifier: true, password: true }))
 		.output(z.object({ token: z.string() }))
@@ -119,8 +114,16 @@ const buildAuthModel = <T extends BaseAuthModelType>(
 		),
 });
 
+export const buildAuthModel = <T extends BaseAuthModelType>(
+	model: T,
+	repository: AuthRepository<z.infer<T>>
+) => ({
+	...proceduresBuilder(model, repository),
+	...buildLoginProcedure(model, repository),
+});
+
 type ResultRouteModel<T extends BaseModelType> = ReturnType<
-	typeof buildModelrouter<T>
+	typeof proceduresBuilder<T>
 >;
 
 type RouterBuilder<T extends BaseModelType> = {
@@ -141,21 +144,37 @@ const buildModelsRouter = <T extends RouterMoldesBuilder>(
 	return Object.entries(rMb).reduce(
 		(acc, [key, item]) => ({
 			...acc,
-			[key]: buildModelrouter(item.model, item.repository),
+			[key]: t.router(proceduresBuilder(item.model, item.repository)),
 		}),
 		{} as BuildType<T>
 	);
 };
 
-const PostClassRepo = buildInMemoryRepository<typeof Post>();
-const AuthClassRepo = buildInMemoryAuthRepository<typeof User>();
+export const modelsWithRepositories = <
+	T extends Record<string, BaseModelType>,
+	P extends keyof T
+>(
+	models: T,
+	repositories: Record<P, Repository<z.infer<T[P]>>>
+): Record<P, { model: T[P]; repository: Repository<z.infer<T[P]>> }> =>
+	mapMergeObject(
+		mapMapObject(models, (_, model) => ({ model })),
+		mapMapObject(repositories, (_, repository) => ({ repository }))
+	) as Record<P, { model: T[P]; repository: Repository<z.infer<T[P]>> }>;
+
+const buildAuthModelRouter = <T extends BaseAuthModelType>(
+	authModel: T,
+	repository: AuthRepository<z.infer<T>>
+) => t.router(buildAuthModel(authModel, repository));
+
+const PostClassRepo = buildInMemoryRepository<typeof models.common.post>();
+const AuthClassRepo = buildInMemoryAuthRepository<typeof models.auth>();
 
 export const appRouter = t.router({
-	...buildModelsRouter({
-		post: {
-			model: Post,
-			repository: new PostClassRepo(),
-		},
-	}),
-	auth: buildAuthModel(User, new AuthClassRepo()),
+	...buildModelsRouter(
+		modelsWithRepositories(models.common, {
+			post: new PostClassRepo(),
+		})
+	),
+	auth: buildAuthModelRouter(models.auth, new AuthClassRepo()),
 });
