@@ -3,6 +3,7 @@ import { ROLES } from '../models/BaseAuthModel';
 
 export interface TokenPayload {
 	identifier: string;
+	id: string;
 	role: ROLES;
 }
 

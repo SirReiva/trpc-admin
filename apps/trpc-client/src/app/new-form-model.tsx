@@ -1,18 +1,11 @@
 import { type BaseModelType } from '@trpc-shared/models/BaseModel';
-import { PasswordSchema } from '@trpc-shared/utils/schemas';
 import { createTsForm } from '@ts-react/form';
 import { useNavigate } from 'react-router-dom';
 import uuid from 'uuid-random';
-import { z } from 'zod';
 import { TrpcModels, trpc } from '../trpc';
-import PasswordField from './components/PasswordField';
-import TextField from './components/TextField';
+import { formMapping } from './form-mapping';
 
-const mapping = [
-	[PasswordSchema, PasswordField],
-	[z.string(), TextField],
-] as const;
-const Form = createTsForm(mapping);
+const Form = createTsForm(formMapping);
 
 const buildNewFormModel = (model: BaseModelType, name: TrpcModels) => {
 	const idLessModel = model.omit({ id: true });

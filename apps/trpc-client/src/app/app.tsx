@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Post } from '@trpc-shared/models/Post';
-import { User } from '@trpc-shared/models/User';
+import { models } from '@trpc-shared/models';
 import { useMemo } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { createClient } from '../client';
@@ -11,10 +10,12 @@ import Index from './pages';
 import Admin from './pages/admin';
 import Login from './pages/login';
 import { withAuth } from './hoc/withAuth';
+import pick from 'just-pick';
+import { withNoAuth } from './hoc/withNoAuth';
 
 const routes = buildRouter({
-	auth: User,
-	post: Post,
+	...models.common,
+	...pick(models, 'auth'),
 });
 
 const App = () => {
@@ -49,7 +50,7 @@ const App = () => {
 						},
 						{
 							path: 'login',
-							Component: Login,
+							Component: withNoAuth(Login),
 						},
 					])}></RouterProvider>
 			</QueryClientProvider>

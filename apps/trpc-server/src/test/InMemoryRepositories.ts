@@ -88,7 +88,10 @@ export const buildInMemoryAuthRepository = <T extends BaseAuthModelType>() => {
 				});
 
 			return {
-				token: await signJWT({ identifier, role: user.role }, 'ZASCA'),
+				token: await signJWT(
+					{ identifier, role: user.role, id: user.id },
+					'ZASCA'
+				),
 			};
 		}
 	};

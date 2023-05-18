@@ -8,7 +8,8 @@ export interface AuthData {
 
 export type AuthContext = {
 	auth?: AuthData;
-	setAuth: (token: string | undefined) => void;
+	logIn: (token: string) => void;
+	logOut: () => void;
 };
 
 const authContext = createContext<AuthContext>(null as any);
@@ -24,21 +25,22 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
 		};
 	});
 
-	const setAuth = (token: string | undefined) => {
-		if (!token) {
-			localStorage.removeItem('token');
-			setAuthState(undefined);
-		} else {
-			const data = decodeJWT(token);
-			setAuthState({
-				token,
-				data,
-			});
-		}
+	const logIn = (token: string) => {
+		const data = decodeJWT(token);
+		localStorage.setItem('token', token);
+		setAuthState({
+			token,
+			data,
+		});
+	};
+
+	const logOut = () => {
+		localStorage.removeItem('token');
+		setAuthState(undefined);
 	};
 
 	return (
-		<authContext.Provider value={{ auth, setAuth }}>
+		<authContext.Provider value={{ auth, logIn, logOut }}>
 			{children}
 		</authContext.Provider>
 	);

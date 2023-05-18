@@ -9,7 +9,7 @@ export enum ROLES {
 
 export const BaseAuthModel = z.object({
 	id: z.string().uuid(),
-	identifier: z.string(),
+	identifier: z.string().min(4),
 	password: PasswordSchema,
 	role: z.nativeEnum(ROLES),
 });

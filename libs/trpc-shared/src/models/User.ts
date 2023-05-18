@@ -3,7 +3,6 @@ import { PasswordSchema } from '../utils/schemas';
 import { BaseAuthModel } from './BaseAuthModel';
 
 export const User = BaseAuthModel.extend({
-	name: z.string().min(4),
 	password: PasswordSchema,
 });
 

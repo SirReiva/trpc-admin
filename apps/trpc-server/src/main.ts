@@ -7,6 +7,11 @@ import { getFastifyPlugin } from 'trpc-playground/handlers/fastify';
 import { appRouter } from './trpc/router';
 import figlet from 'figlet';
 import { createContext } from './trpc/context';
+import { install } from 'source-map-support';
+
+install({
+	environment: 'node',
+});
 
 const TRPC_ENDPOINT = '/trpc';
 const TRPC_PLAYGROUND_ENDPOINT = '/playground';

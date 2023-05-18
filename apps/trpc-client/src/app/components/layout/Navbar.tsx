@@ -1,19 +1,21 @@
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import { useAuth } from '../../context/authContext';
+import { useNavigate } from 'react-router-dom';
 
 function NavBar() {
+	const { logOut, auth } = useAuth();
+	const nativate = useNavigate();
 	return (
 		<nav className='flex items-center space-x-4 shadow bg-white w-full px-5 absolute h-14'>
 			<div className='hidden md:inline-flex flex-1'></div>
 
-			<a href='!#' className='relative text-gray-500 hover:text-gray-800'>
-				<span className='absolute top-0 right-0 w-2 h-2 bg-red-600 rounded-full'></span>
-			</a>
-
 			<Menu as='div' className='relative inline-block text-left'>
 				<div>
 					<Menu.Button className='inline-flex justify-center w-full items-center text-gray-500 hover:text-gray-800 focus:outline-none'>
-						<span className='font-medium ml-3 mr-1'>Super User</span>
+						<span className='font-medium ml-3 mr-1'>
+							{auth?.data.identifier}[{auth?.data.role}]
+						</span>
 					</Menu.Button>
 				</div>
 				<Transition
@@ -29,28 +31,10 @@ function NavBar() {
 							<Menu.Item>
 								{({ active }) => (
 									<button
-										className={`${
-											active ? 'bg-indigo-600 text-white' : 'text-gray-900'
-										} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>
-										Profile
-									</button>
-								)}
-							</Menu.Item>
-							<Menu.Item>
-								{({ active }) => (
-									<button
-										className={`${
-											active ? 'bg-indigo-600 text-white' : 'text-gray-900'
-										} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>
-										Setting
-									</button>
-								)}
-							</Menu.Item>
-						</div>
-						<div className='px-1 py-1 '>
-							<Menu.Item>
-								{({ active }) => (
-									<button
+										onClick={() => {
+											logOut();
+											nativate('/login');
+										}}
 										className={`${
 											active ? 'bg-indigo-600 text-white' : 'text-gray-900'
 										} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>

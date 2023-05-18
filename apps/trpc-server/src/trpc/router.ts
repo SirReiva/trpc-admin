@@ -1,4 +1,4 @@
-import { BaseAuthModelType } from '@trpc-shared/models/BaseAuthModel';
+import { BaseAuthModelType, ROLES } from '@trpc-shared/models/BaseAuthModel';
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
 import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
@@ -10,8 +10,8 @@ import { AuthContextType } from './context';
 import { AuthRepository, Repository } from './repository';
 import { observable } from '@trpc/server/observable';
 import { models } from '@trpc-shared/models';
-import mapMergeObject from 'just-merge';
 import mapMapObject from 'just-map-object';
+import uuid from 'uuid-random';
 
 const t = initTRPC.context<AuthContextType>().create();
 
@@ -157,24 +157,30 @@ export const modelsWithRepositories = <
 	models: T,
 	repositories: Record<P, Repository<z.infer<T[P]>>>
 ): Record<P, { model: T[P]; repository: Repository<z.infer<T[P]>> }> =>
-	mapMergeObject(
-		mapMapObject(models, (_, model) => ({ model })),
-		mapMapObject(repositories, (_, repository) => ({ repository }))
-	) as Record<P, { model: T[P]; repository: Repository<z.infer<T[P]>> }>;
+	mapMapObject(models, (name, model) => ({
+		model,
+		repository: repositories[name as keyof typeof repositories],
+	})) as Record<P, { model: T[P]; repository: Repository<z.infer<T[P]>> }>;
 
 const buildAuthModelRouter = <T extends BaseAuthModelType>(
 	authModel: T,
 	repository: AuthRepository<z.infer<T>>
 ) => t.router(buildAuthModel(authModel, repository));
 
-const PostClassRepo = buildInMemoryRepository<typeof models.common.post>();
-const AuthClassRepo = buildInMemoryAuthRepository<typeof models.auth>();
+const postRepo = new (buildInMemoryRepository<typeof models.common.post>())();
+const authRepo = new (buildInMemoryAuthRepository<typeof models.auth>())();
+authRepo.create({
+	id: uuid(),
+	identifier: 'admin',
+	password: '123456789',
+	role: ROLES.ADMIN,
+});
 
 export const appRouter = t.router({
 	...buildModelsRouter(
 		modelsWithRepositories(models.common, {
-			post: new PostClassRepo(),
+			post: postRepo,
 		})
 	),
-	auth: buildAuthModelRouter(models.auth, new AuthClassRepo()),
+	auth: buildAuthModelRouter(models.auth, authRepo),
 });
