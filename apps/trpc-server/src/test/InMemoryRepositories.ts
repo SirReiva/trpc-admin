@@ -53,7 +53,13 @@ export const buildInMemoryAuthRepository = <T extends BaseAuthModelType>() => {
 			store = store.filter(it => it.id !== id);
 		}
 		findById(id: string): MaybePromise<z.infer<T> | null> {
-			return store.find(it => it.id === id) || null;
+			const item = store.find(it => it.id === id);
+			if (!item) return null;
+
+			return {
+				...item,
+				password: '*********',
+			};
 		}
 
 		updateById(id: string, data: Omit<z.infer<T>, 'id'>): MaybePromise<void> {
@@ -70,7 +76,9 @@ export const buildInMemoryAuthRepository = <T extends BaseAuthModelType>() => {
 			pageSize: number
 		): MaybePromise<{ data: z.infer<T>[]; total: number; page: number }> {
 			return {
-				data: store.slice((page - 1) * pageSize, page * pageSize),
+				data: store
+					.slice((page - 1) * pageSize, page * pageSize)
+					.map(item => ({ ...item, password: '*******' })),
 				page,
 				total: store.length,
 			};

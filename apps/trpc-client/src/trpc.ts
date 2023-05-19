@@ -1,7 +1,11 @@
 import type { AppRouter } from '@trpc-server/trpc/client';
+import { models } from '@trpc-shared/models';
 import { createTRPCReact } from '@trpc/react-query';
+import pick from 'just-pick';
 
-export const trpc = createTRPCReact<AppRouter>();
+export const trpc = createTRPCReact<AppRouter>({
+	abortOnUnmount: true,
+});
 
 export type TrpcModels = keyof Omit<
 	typeof trpc,
@@ -11,6 +15,11 @@ export type TrpcModels = keyof Omit<
 	| 'useDehydratedState'
 	| 'useQueries'
 >;
+
+export const mergedModes = {
+	...models.common,
+	...pick(models, 'auth'),
+};
 
 export const TrpcProvider = trpc.Provider;
 

@@ -1,26 +1,21 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { models } from '@trpc-shared/models';
 import { useMemo } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { createClient } from '../client';
 import { buildRouter } from '../router';
-import { TrpcProvider } from '../trpc';
+import { TrpcProvider, mergedModes } from '../trpc';
 import { useAuth } from './context/authContext';
+import { withAuth } from './hoc/withAuth';
+import { withNoAuth } from './hoc/withNoAuth';
 import Index from './pages';
 import Admin from './pages/admin';
 import Login from './pages/login';
-import { withAuth } from './hoc/withAuth';
-import pick from 'just-pick';
-import { withNoAuth } from './hoc/withNoAuth';
 
-const routes = buildRouter({
-	...models.common,
-	...pick(models, 'auth'),
-});
+const routes = buildRouter(mergedModes);
 
 const App = () => {
 	const { auth } = useAuth();
-	const queryClient = useMemo(() => new QueryClient(), [auth?.token]);
+	const queryClient = useMemo(() => new QueryClient({}), [auth?.token]);
 	const trpcClient = useMemo(
 		() =>
 			createClient(

@@ -13,8 +13,11 @@ function NavBar() {
 			<Menu as='div' className='relative inline-block text-left'>
 				<div>
 					<Menu.Button className='inline-flex justify-center w-full items-center text-gray-500 hover:text-gray-800 focus:outline-none'>
-						<span className='font-medium ml-3 mr-1'>
-							{auth?.data.identifier}[{auth?.data.role}]
+						<span className='font-medium ml-3 m-1'>
+							<b className='mx-2'>{auth?.data.identifier}</b>
+							<span className='bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300'>
+								{auth?.data.role}
+							</span>
 						</span>
 					</Menu.Button>
 				</div>

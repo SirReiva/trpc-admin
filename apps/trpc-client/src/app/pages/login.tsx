@@ -12,10 +12,10 @@ const LoginSchema = models.auth.pick({ identifier: true, password: true });
 
 const Login = () => {
 	const navigate = useNavigate();
-	const useLogin = trpc.auth.login.useMutation();
+	const loginApicall = trpc.auth.login.useMutation();
 	const { logIn } = useAuth();
 	const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
-		const result = await useLogin.mutateAsync(data);
+		const result = await loginApicall.mutateAsync(data);
 		logIn(result.token);
 		navigate('/admin');
 	};
