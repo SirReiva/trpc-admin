@@ -20,18 +20,22 @@ const buildNewFormModel = (model: BaseModelType, name: TrpcModels) => {
 			});
 			navigate('/admin/' + name);
 		}
-		const props = Object.entries(idLessModel.shape).reduce((acc, [name]) => {
-			return {
-				...acc,
-				[name]: {
-					label: name,
-					placeholder: name,
-				},
-			};
-		}, {}) as any;
+		const props = Object.entries(idLessModel.shape).reduce(
+			(acc, [name, model]) => {
+				return {
+					...acc,
+					[name]: {
+						label: name,
+						placeholder: name,
+						options: Object.values((model as any)?.enum || {}),
+					},
+				};
+			},
+			{}
+		) as any;
 		return (
 			<>
-				<h2>
+				<h2 className='my-6 font-bold'>
 					New <span className='capitalize'>{name}</span>
 				</h2>
 				<Form
@@ -40,7 +44,7 @@ const buildNewFormModel = (model: BaseModelType, name: TrpcModels) => {
 					renderAfter={() => (
 						<button
 							type='submit'
-							className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'>
+							className='mt-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'>
 							Submit
 						</button>
 					)}

@@ -1,7 +1,12 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+	MutationCache,
+	QueryCache,
+	QueryClient,
+	QueryClientProvider,
+} from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import { createClient } from '../client';
+import { TRPC_MODES, createClient } from '../client';
 import { buildRouter } from '../router';
 import { TrpcProvider, mergedModes } from '../trpc';
 import { useAuth } from './context/authContext';
@@ -14,15 +19,42 @@ import Login from './pages/login';
 const routes = buildRouter(mergedModes);
 
 const App = () => {
+	const mutationCache = useMemo(
+		() =>
+			new MutationCache({
+				onError(error, _variables, _context, _mutation) {
+					console.warn(error);
+				},
+			}),
+		[]
+	);
+
+	const queryCache = useMemo(
+		() =>
+			new QueryCache({
+				onError(error, _query) {
+					console.warn(error);
+				},
+			}),
+		[]
+	);
+
 	const { auth } = useAuth();
-	const queryClient = useMemo(() => new QueryClient({}), [auth?.token]);
+	const queryClient = useMemo(
+		() =>
+			new QueryClient({
+				mutationCache,
+				queryCache,
+			}),
+		[auth?.token, mutationCache]
+	);
 	const trpcClient = useMemo(
 		() =>
 			createClient(
 				'//localhost:3000/trpc',
 				{
-					post: false,
-					auth: false,
+					post: TRPC_MODES.WS,
+					auth: TRPC_MODES.WS,
 				},
 				auth?.token
 			),

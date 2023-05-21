@@ -1,6 +1,10 @@
-import { BaseAuthModelType, ROLES } from '@trpc-shared/models/BaseAuthModel';
+import { models } from '@trpc-shared/models';
+import { BaseAuthModelType } from '@trpc-shared/models/BaseAuthModel';
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
-import { initTRPC } from '@trpc/server';
+import { TRPCError, initTRPC } from '@trpc/server';
+import { observable } from '@trpc/server/observable';
+import mapMapObject from 'just-map-object';
+import uuid from 'uuid-random';
 import { z } from 'zod';
 import {
 	buildInMemoryAuthRepository,
@@ -8,19 +12,22 @@ import {
 } from '../test/InMemoryRepositories';
 import { AuthContextType } from './context';
 import { AuthRepository, Repository } from './repository';
-import { observable } from '@trpc/server/observable';
-import { models } from '@trpc-shared/models';
-import mapMapObject from 'just-map-object';
-import uuid from 'uuid-random';
 
 const t = initTRPC.context<AuthContextType>().create();
+
+const authMiddleware = t.middleware(({ ctx, next }) => {
+	if (!ctx.auth) throw new TRPCError({ code: 'UNAUTHORIZED' });
+	return next();
+});
+
+const protectedProcedure = t.procedure.use(authMiddleware);
 
 const proceduresBuilder = <T extends BaseModelType>(
 	model: T,
 	repository: Repository<z.infer<T>>
 ) => {
 	return {
-		onCreate: t.procedure.subscription(() => {
+		onCreate: protectedProcedure.subscription(() => {
 			return observable<z.infer<T>>(emit => {
 				const onAdd = (data: z.infer<T>) => {
 					emit.next(data);
@@ -31,7 +38,7 @@ const proceduresBuilder = <T extends BaseModelType>(
 				};
 			});
 		}),
-		onUpdate: t.procedure.subscription(() => {
+		onUpdate: protectedProcedure.subscription(() => {
 			return observable<z.infer<T>>(emit => {
 				const onAdd = (data: z.infer<T>) => {
 					emit.next(data);
@@ -42,7 +49,7 @@ const proceduresBuilder = <T extends BaseModelType>(
 				};
 			});
 		}),
-		onDelete: t.procedure.subscription(() => {
+		onDelete: protectedProcedure.subscription(() => {
 			return observable<z.infer<T>>(emit => {
 				const onAdd = (data: z.infer<T>) => {
 					emit.next(data);
@@ -53,11 +60,11 @@ const proceduresBuilder = <T extends BaseModelType>(
 				};
 			});
 		}),
-		create: t.procedure
+		create: protectedProcedure
 			.input(model)
 			.output(z.void())
 			.mutation(({ input }) => repository.create(input as any)),
-		updateById: t.procedure
+		updateById: protectedProcedure
 			.input(
 				z.object({
 					id: z.string(),
@@ -68,7 +75,7 @@ const proceduresBuilder = <T extends BaseModelType>(
 			.mutation(({ input }) =>
 				repository.updateById(input.id, input.data as any)
 			),
-		deleteById: t.procedure
+		deleteById: protectedProcedure
 			.input(
 				z.object({
 					id: z.string(),
@@ -76,7 +83,7 @@ const proceduresBuilder = <T extends BaseModelType>(
 			)
 			.output(z.void())
 			.mutation(({ input }) => repository.deleteById(input.id)),
-		getById: t.procedure
+		getById: protectedProcedure
 			.input(
 				z.object({
 					id: z.string(),
@@ -84,7 +91,7 @@ const proceduresBuilder = <T extends BaseModelType>(
 			)
 			.output(z.nullable(model))
 			.query(({ input }) => repository.findById(input.id)),
-		list: t.procedure
+		list: protectedProcedure
 			.input(
 				z.object({
 					page: z.number(),
@@ -172,8 +179,8 @@ const authRepo = new (buildInMemoryAuthRepository<typeof models.auth>())();
 authRepo.create({
 	id: uuid(),
 	identifier: 'admin',
-	password: '123456789',
-	role: ROLES.ADMIN,
+	password: '1234',
+	role: 'ADMIN',
 });
 
 export const appRouter = t.router({

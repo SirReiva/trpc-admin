@@ -8,9 +8,14 @@ import {
 } from '@trpc/client';
 import { TrpcModels, trpc } from './trpc';
 
+export enum TRPC_MODES {
+	HTTP = 0,
+	WS = 1,
+}
+
 export const createClient = (
 	baseUrl: string,
-	linksConfig: Record<TrpcModels, boolean>,
+	linksConfig: Record<TrpcModels, TRPC_MODES>,
 	token?: string
 ) => {
 	return trpc.createClient({
@@ -21,7 +26,9 @@ export const createClient = (
 			splitLink({
 				condition(op: Operation) {
 					const model = op.path.split('.').shift() as TrpcModels;
-					return op.type === 'subscription' || (linksConfig[model] ?? false);
+					return (
+						op.type === 'subscription' || Boolean(linksConfig[model] ?? false)
+					);
 				},
 				false: httpBatchLink({
 					url: 'http:' + baseUrl,

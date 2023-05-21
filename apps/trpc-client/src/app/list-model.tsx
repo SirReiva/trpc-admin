@@ -2,6 +2,7 @@ import { BaseModelType } from '@trpc-shared/models/BaseModel';
 import { typedObjectEntries } from '@trpc-shared/utils/object';
 import { usePagination, useTable } from 'react-table';
 import { TrpcModels, trpc } from '../trpc';
+import { Link } from 'react-router-dom';
 
 const Table = ({
 	columns,
@@ -114,8 +115,15 @@ const bulidListModel = (model: BaseModelType, name: TrpcModels) => {
 		if (listQuery.isLoading) return <ListLoader />;
 
 		return (
-			<div className='flex flex-col space-y-2'>
+			<div className='flex flex-col'>
 				<h2 className='font-medium text-2xl capitalize'>{name}</h2>
+				<div className='block my-4'>
+					<Link
+						className='bg-blue-500 px-6 py-3 rounded-md text-white'
+						to={'/admin/' + name + '/new'}>
+						+ Add {name}
+					</Link>
+				</div>
 				<Table data={listQuery.data?.data || []} columns={columns} />
 			</div>
 		);

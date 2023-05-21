@@ -18,13 +18,12 @@ export const signJWT = (
 		.sign(Buffer.from(key));
 };
 
-export const verifyJWT = (
+export const verifyJWT = async (
 	token: string,
 	key: string
 ): Promise<TokenPayload> => {
-	return jwtVerify(token, Buffer.from(key)).then(
-		data => data.payload as any as TokenPayload
-	);
+	const data = await jwtVerify(token, Buffer.from(key));
+	return data.payload as any as TokenPayload;
 };
 
 export const decodeJWT = (token: string): TokenPayload => {
