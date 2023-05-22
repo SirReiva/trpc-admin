@@ -12,6 +12,7 @@ import {
 } from '../test/InMemoryRepositories';
 import { AuthContextType } from './context';
 import { AuthRepository, Repository } from './repository';
+import { logger } from '../logger';
 
 const t = initTRPC.context<AuthContextType>().create();
 
@@ -21,11 +22,17 @@ const loggerMiddleware = t.middleware(async opts => {
 	const result = await opts.next();
 
 	const durationMs = Date.now() - start;
-	const meta = { path: opts.path, type: opts.type, durationMs };
+	const meta = {
+		path: opts.path,
+		type: opts.type,
+		durationMs,
+		input: opts.input,
+		output: (result as any).data,
+	};
 
 	result.ok
-		? console.log('OK request timing:', meta)
-		: console.error('Non-OK request timing', meta);
+		? logger.info(meta, 'OK request:')
+		: logger.error('Non-OK request', meta);
 
 	return result;
 });
@@ -200,6 +207,14 @@ authRepo.create({
 	password: '1234',
 	role: 'ADMIN',
 });
+
+for (let index = 0; index < 1000; index++) {
+	postRepo.create({
+		id: uuid(),
+		description: 'decription' + (index + 1),
+		title: 'title' + (index + 1),
+	});
+}
 
 export const appRouter = t.router({
 	...buildModelsRouter(

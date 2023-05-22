@@ -2,6 +2,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { useAuth } from '../../context/authContext';
 import { useNavigate } from 'react-router-dom';
+import { RiLogoutBoxRFill } from 'react-icons/ri';
 
 function NavBar() {
 	const { logOut, auth } = useAuth();
@@ -40,7 +41,8 @@ function NavBar() {
 										}}
 										className={`${
 											active ? 'bg-indigo-600 text-white' : 'text-gray-900'
-										} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>
+										} group flex rounded-md items-center w-full px-2 py-2 text-sm gap-2`}>
+										<RiLogoutBoxRFill className='text-lg' />
 										Sign out
 									</button>
 								)}

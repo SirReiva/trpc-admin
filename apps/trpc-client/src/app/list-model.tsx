@@ -1,8 +1,9 @@
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
 import { typedObjectEntries } from '@trpc-shared/utils/object';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { usePagination, useTable } from 'react-table';
 import { TrpcModels, trpc } from '../trpc';
+import { FaPlusCircle } from 'react-icons/fa';
 
 const Table = ({
 	columns,
@@ -101,6 +102,64 @@ const ListLoader = () => (
 	</div>
 );
 
+const TablePagination = ({
+	currentPage,
+	totalPages,
+	goToPage,
+}: {
+	currentPage: number;
+	totalPages: number;
+	goToPage: (page: number) => void;
+}) => {
+	return (
+		<div className='flex flex-row-reverse'>
+			<nav
+				className='rounded-md border divide-x bg-white mt-4 text-sm text-gray-700'
+				aria-label='Pagination'>
+				<button
+					onClick={() => goToPage(currentPage - 1)}
+					className='px-3 py-2 focus:outline-none disabled:opacity-25'
+					disabled={currentPage === 1}>
+					Prev
+				</button>
+				{Array.from(Array(totalPages).keys())
+					.map(i => i + 1)
+					.filter(
+						index =>
+							Math.abs(currentPage - index) < 3 ||
+							index < 3 ||
+							totalPages - index < 2
+					)
+					.map((index, _, arr) => (
+						<div
+							className='inline-flex justify-center items-center'
+							key={index}>
+							<button
+								disabled={index === currentPage}
+								className={`px-4 py-2 focus:outline-none ${
+									index === currentPage ? 'text-white bg-blue-600' : ''
+								}`}
+								onClick={() => goToPage(index)}>
+								{index}
+							</button>
+							{!arr.includes(index + 1) && index + 1 < totalPages && (
+								<div className='px-4 py-2 h-full flex justify-center items-center cursor-default leading-1_25 transition duration-150 ease-in border-l'>
+									...
+								</div>
+							)}
+						</div>
+					))}
+				<button
+					onClick={() => goToPage(currentPage + 1)}
+					className='px-3 py-2 focus:outline-none disabled:opacity-25'
+					disabled={currentPage === totalPages}>
+					Next
+				</button>
+			</nav>
+		</div>
+	);
+};
+
 const bulidListModel = (model: BaseModelType, name: TrpcModels) => {
 	const columns = typedObjectEntries(model.shape)
 		.filter(([name]) => name !== 'id')
@@ -109,22 +168,35 @@ const bulidListModel = (model: BaseModelType, name: TrpcModels) => {
 			accessor: name,
 		}));
 
+	const pageSize = 10;
+
 	return () => {
-		const listQuery = trpc[name].list.useQuery({ page: 1, pageSize: 10 });
+		const [searchParams, SetURLSearchParams] = useSearchParams();
+
+		const page = parseInt(searchParams.get('page') ?? '1');
+
+		const listQuery = trpc[name].list.useQuery({ page, pageSize });
 
 		if (listQuery.isLoading) return <ListLoader />;
+
+		const total = listQuery.data?.total ?? 0;
 
 		return (
 			<div className='flex flex-col'>
 				<h2 className='font-medium text-2xl capitalize'>{name}</h2>
 				<div className='block my-4'>
 					<Link
-						className='bg-blue-500 px-6 py-3 rounded-md text-white'
+						className='bg-blue-500 px-4 py-2 rounded-md text-white inline-flex justify-center items-center gap-2'
 						to={'/admin/' + name + '/new'}>
-						+ Add {name}
+						<FaPlusCircle className='inline' /> Add {name}
 					</Link>
 				</div>
 				<Table data={listQuery.data?.data || []} columns={columns} />
+				<TablePagination
+					totalPages={Math.max(1, Math.ceil(total / pageSize))}
+					currentPage={page}
+					goToPage={page => SetURLSearchParams({ page: page.toString() })}
+				/>
 			</div>
 		);
 	};

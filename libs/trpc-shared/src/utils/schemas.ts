@@ -5,3 +5,8 @@ export const PasswordSchema = createUniqueFieldSchema(
 	z.string().min(4),
 	'password'
 ) as any as ZodString;
+
+export const LongTextSchema = createUniqueFieldSchema(
+	z.string().min(4),
+	'longtext'
+) as any as ZodString;

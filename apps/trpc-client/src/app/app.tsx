@@ -22,8 +22,8 @@ const App = () => {
 	const mutationCache = useMemo(
 		() =>
 			new MutationCache({
-				onError(error, _variables, _context, _mutation) {
-					console.warn(error);
+				onError(error, _variables, _context, mutation) {
+					console.warn(error, mutation);
 				},
 			}),
 		[]
@@ -32,8 +32,8 @@ const App = () => {
 	const queryCache = useMemo(
 		() =>
 			new QueryCache({
-				onError(error, _query) {
-					console.warn(error);
+				onError(error, query) {
+					console.warn(error, query);
 				},
 			}),
 		[]
