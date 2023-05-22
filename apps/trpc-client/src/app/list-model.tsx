@@ -1,8 +1,8 @@
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
 import { typedObjectEntries } from '@trpc-shared/utils/object';
+import { Link } from 'react-router-dom';
 import { usePagination, useTable } from 'react-table';
 import { TrpcModels, trpc } from '../trpc';
-import { Link } from 'react-router-dom';
 
 const Table = ({
 	columns,

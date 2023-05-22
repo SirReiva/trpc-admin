@@ -15,12 +15,30 @@ import { AuthRepository, Repository } from './repository';
 
 const t = initTRPC.context<AuthContextType>().create();
 
+const loggerMiddleware = t.middleware(async opts => {
+	const start = Date.now();
+
+	const result = await opts.next();
+
+	const durationMs = Date.now() - start;
+	const meta = { path: opts.path, type: opts.type, durationMs };
+
+	result.ok
+		? console.log('OK request timing:', meta)
+		: console.error('Non-OK request timing', meta);
+
+	return result;
+});
+
 const authMiddleware = t.middleware(({ ctx, next }) => {
 	if (!ctx.auth) throw new TRPCError({ code: 'UNAUTHORIZED' });
 	return next();
 });
 
-const protectedProcedure = t.procedure.use(authMiddleware);
+const baseProcedure = t.procedure.use(loggerMiddleware);
+const protectedProcedure = t.procedure
+	.use(loggerMiddleware)
+	.use(authMiddleware);
 
 const proceduresBuilder = <T extends BaseModelType>(
 	model: T,
@@ -113,7 +131,7 @@ const buildLoginProcedure = <T extends BaseAuthModelType>(
 	model: T,
 	repository: AuthRepository<z.infer<T>>
 ) => ({
-	login: t.procedure
+	login: baseProcedure
 		.input(model.pick({ identifier: true, password: true }))
 		.output(z.object({ token: z.string() }))
 		.mutation(({ input }) =>
