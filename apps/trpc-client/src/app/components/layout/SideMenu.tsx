@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { mergedModes } from '../../../trpc';
+import { mergedModels } from '../../../trpc';
 
 const Header = (props: { title: string }) => {
 	return (
@@ -45,7 +45,7 @@ const SideMenu = () => {
 		<div className='bg-gray-800 overflow-y-auto h-screen'>
 			<Header title='Admin' />
 			<ul className='lg:mt-2 lg:space-y-2'>
-				{Object.keys(mergedModes).map(name => (
+				{Object.keys(mergedModels).map(name => (
 					<MenuItem
 						key={name}
 						to={'/admin/' + name}

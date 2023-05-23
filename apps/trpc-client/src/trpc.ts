@@ -1,6 +1,6 @@
 import type { AppRouter } from '@trpc-server/trpc/client';
 import { models } from '@trpc-shared/models';
-import { createTRPCReact } from '@trpc/react-query';
+import { TRPCClientError, createTRPCReact } from '@trpc/react-query';
 import pick from 'just-pick';
 
 export const trpc = createTRPCReact<AppRouter>({
@@ -16,11 +16,15 @@ export type TrpcModels = keyof Omit<
 	| 'useQueries'
 >;
 
-export const mergedModes = {
+export const mergedModels = {
 	...models.common,
 	...pick(models, 'auth'),
 };
 
 export const TrpcProvider = trpc.Provider;
+
+export const isTRPCClientError = (
+	cause: unknown
+): cause is TRPCClientError<AppRouter> => cause instanceof TRPCClientError;
 
 //export type TrpcAuthModels<T extends typeof trpc> = keyof Pick<T, 'auth'>;

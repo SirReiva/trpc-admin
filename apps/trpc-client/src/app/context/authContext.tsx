@@ -1,5 +1,11 @@
 import { TokenPayload, decodeJWT } from '@trpc-shared/utils/jwt';
-import { ReactNode, createContext, useContext, useState } from 'react';
+import {
+	ReactNode,
+	createContext,
+	useCallback,
+	useContext,
+	useState,
+} from 'react';
 
 export interface AuthData {
 	token: string;
@@ -25,19 +31,22 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
 		};
 	});
 
-	const logIn = (token: string) => {
-		const data = decodeJWT(token);
-		localStorage.setItem('token', token);
-		setAuthState({
-			token,
-			data,
-		});
-	};
+	const logIn = useCallback(
+		(token: string) => {
+			const data = decodeJWT(token);
+			localStorage.setItem('token', token);
+			setAuthState({
+				token,
+				data,
+			});
+		},
+		[setAuthState]
+	);
 
-	const logOut = () => {
+	const logOut = useCallback(() => {
 		localStorage.removeItem('token');
 		setAuthState(undefined);
-	};
+	}, [setAuthState]);
 
 	return (
 		<authContext.Provider value={{ auth, logIn, logOut }}>

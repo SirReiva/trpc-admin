@@ -34,13 +34,6 @@
 				"cwd": "apps/trpc-server",
 				"command": "cross-env NODE_ENV=production node -r tsconfig-paths/register ../../dist/apps/trpc-server/main.js"
 			}
-		},
-		"doc": {
-			"executor": "nx:run-commands",
-			"options": {
-				"cwd": "apps/trpc-server",
-				"command": "npx @compodoc/compodoc -p tsconfig.json -s -o --theme material -w"
-			}
 		}
 	},
 	"tags": ["trpc-server"]

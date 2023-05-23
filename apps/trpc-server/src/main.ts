@@ -50,6 +50,5 @@ const server = fastify({
 		figlet('TRPC-SERVER\n---ready---', (_, r) => console.log(r));
 	} catch (err) {
 		server.log.error(err);
-		process.exit(1);
 	}
 })();

@@ -5,10 +5,10 @@ import {
 	QueryClientProvider,
 } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import { TRPC_MODES, createClient } from '../client';
 import { buildRouter } from '../router';
-import { TrpcProvider, mergedModes } from '../trpc';
+import { TrpcProvider, isTRPCClientError, mergedModels } from '../trpc';
 import { useAuth } from './context/authContext';
 import { withAuth } from './hoc/withAuth';
 import { withNoAuth } from './hoc/withNoAuth';
@@ -16,37 +16,62 @@ import Index from './pages';
 import Admin from './pages/admin';
 import Login from './pages/login';
 
-const routes = buildRouter(mergedModes);
+const routes = buildRouter(mergedModels);
 
 const App = () => {
+	const { auth, logOut } = useAuth();
+	const navigate = useNavigate();
+
 	const mutationCache = useMemo(
 		() =>
 			new MutationCache({
 				onError(error, _variables, _context, mutation) {
-					console.warn(error, mutation);
+					if (isTRPCClientError(error)) {
+						if (
+							error.data?.path !== 'auth.login' &&
+							error.data?.httpStatus === 401 &&
+							error.data.code === 'UNAUTHORIZED'
+						) {
+							logOut();
+							navigate('/login');
+							return;
+						}
+						console.warn(error, error.data?.path, mutation);
+						return error;
+					}
 				},
 			}),
-		[]
+		[auth?.token]
 	);
 
 	const queryCache = useMemo(
 		() =>
 			new QueryCache({
 				onError(error, query) {
-					console.warn(error, query);
+					if (isTRPCClientError(error)) {
+						if (
+							error.data?.httpStatus === 401 &&
+							error.data.code === 'UNAUTHORIZED'
+						) {
+							logOut();
+							navigate('/login');
+							return;
+						}
+						console.warn(error, query);
+						return error;
+					}
 				},
 			}),
-		[]
+		[auth?.token]
 	);
 
-	const { auth } = useAuth();
 	const queryClient = useMemo(
 		() =>
 			new QueryClient({
 				mutationCache,
 				queryCache,
 			}),
-		[auth?.token, mutationCache]
+		[queryCache, mutationCache]
 	);
 	const trpcClient = useMemo(
 		() =>
@@ -64,22 +89,13 @@ const App = () => {
 	return (
 		<TrpcProvider client={trpcClient} queryClient={queryClient}>
 			<QueryClientProvider client={queryClient}>
-				<RouterProvider
-					router={createBrowserRouter([
-						{
-							index: true,
-							Component: Index,
-						},
-						{
-							path: 'admin',
-							Component: withAuth(Admin),
-							children: routes,
-						},
-						{
-							path: 'login',
-							Component: withNoAuth(Login),
-						},
-					])}></RouterProvider>
+				<Routes>
+					<Route path='/' index Component={Index} />
+					<Route path='/login' Component={withNoAuth(Login)} />
+					<Route path='/admin' Component={withAuth(Admin)}>
+						{...routes}
+					</Route>
+				</Routes>
 			</QueryClientProvider>
 		</TrpcProvider>
 	);

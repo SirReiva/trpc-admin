@@ -28,11 +28,12 @@ const loggerMiddleware = t.middleware(async opts => {
 		durationMs,
 		input: opts.input,
 		output: (result as any).data,
+		error: (result as any).error,
 	};
 
 	result.ok
 		? logger.info(meta, 'OK request:')
-		: logger.error('Non-OK request', meta);
+		: logger.error(meta, 'Non-OK request');
 
 	return result;
 });
