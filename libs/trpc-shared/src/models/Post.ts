@@ -1,10 +1,10 @@
 import { z } from 'zod';
+import { MDXSchema } from '../utils/schemas';
 import { BaseModel } from './BaseModel';
-import { LongTextSchema } from '../utils/schemas';
 
 export const Post = BaseModel.extend({
 	title: z.string(),
-	description: LongTextSchema,
+	description: MDXSchema,
 });
 
 export type PostType = z.infer<typeof Post>;

@@ -10,3 +10,8 @@ export const LongTextSchema = createUniqueFieldSchema(
 	z.string().min(4),
 	'longtext'
 ) as any as ZodString;
+
+export const MDXSchema = createUniqueFieldSchema(
+	z.string().min(4),
+	'mdx'
+) as any as ZodString;
