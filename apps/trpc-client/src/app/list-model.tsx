@@ -175,6 +175,7 @@ const bulidListModel = (model: BaseModelType, name: TrpcModels) => {
 
 		const page = parseInt(searchParams.get('page') ?? '1');
 
+		//@ts-ignore
 		const listQuery = trpc[name].list.useQuery({ page, pageSize });
 
 		if (listQuery.isLoading) return <ListLoader />;

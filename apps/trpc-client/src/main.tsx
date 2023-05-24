@@ -1,10 +1,10 @@
-import 'zod-metadata/register';
-import { createRoot } from 'react-dom/client';
 import React from 'react';
-import './index.css';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import 'zod-metadata/register';
 import App from './app/app';
 import AuthProvider from './app/context/authContext';
-import { BrowserRouter } from 'react-router-dom';
+import './index.css';
 
 const container = document.getElementById('root') as HTMLDivElement;
 const root = createRoot(container);

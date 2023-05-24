@@ -8,15 +8,17 @@ import { useMemo } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import { TRPC_MODES, createClient } from '../client';
 import { buildRouter } from '../router';
-import { TrpcProvider, isTRPCClientError, mergedModels } from '../trpc';
+import { TrpcProvider, isTRPCClientError } from '../trpc';
 import { useAuth } from './context/authContext';
 import { withAuth } from './hoc/withAuth';
 import { withNoAuth } from './hoc/withNoAuth';
 import Index from './pages';
 import Admin from './pages/admin';
 import Login from './pages/login';
+import { models } from '@trpc-shared/models';
+import ToastSubscriptoin from './ToastSubscrition';
 
-const routes = buildRouter(mergedModels);
+const routes = buildRouter(models);
 
 const App = () => {
 	const { auth, logOut } = useAuth();
@@ -96,6 +98,7 @@ const App = () => {
 						{...routes}
 					</Route>
 				</Routes>
+				<ToastSubscriptoin />
 			</QueryClientProvider>
 		</TrpcProvider>
 	);

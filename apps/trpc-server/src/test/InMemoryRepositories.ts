@@ -1,10 +1,10 @@
+import { BaseAuthModelType } from '@trpc-shared/models/BaseAuthModel';
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
+import { signJWT } from '@trpc-shared/utils/jwt';
 import { MaybePromise, TRPCError } from '@trpc/server';
+import EventEmitter from 'events';
 import { z } from 'zod';
 import { AuthRepository, Repository } from '../trpc/repository';
-import { BaseAuthModelType } from '@trpc-shared/models/BaseAuthModel';
-import { signJWT } from '@trpc-shared/utils/jwt';
-import EventEmitter from 'events';
 
 export const buildInMemoryRepository = <T extends BaseModelType>() => {
 	let store: z.infer<T>[] = [];
@@ -19,7 +19,6 @@ export const buildInMemoryRepository = <T extends BaseModelType>() => {
 		findById(id: string): MaybePromise<z.infer<T> | null> {
 			return store.find(it => it.id === id) || null;
 		}
-
 		updateById(id: string, data: Omit<z.infer<T>, 'id'>): MaybePromise<void> {
 			const index = store.findIndex(it => it.id === id);
 			if (!store[index]) return;

@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"outDir": "../../dist/apps/trpc-server",
 		"paths": {
-			"@trpc-shared/*": ["dist/libs/trpc-shared/*"]
+			"@trpc-shared/*": ["dist/libs/trpc-shared/*"],
+			"@trpc-server/*": ["apps/trpc-server/src/*"]
 		},
 		"plugins": [
 			{
