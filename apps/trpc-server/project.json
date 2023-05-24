@@ -8,7 +8,7 @@
 			"executor": "nx:run-commands",
 			"options": {
 				"cwd": "apps/trpc-server",
-				"command": "cross-env NODE_ENV=development npx tsc-watch --compiler \"ttypescript/bin/tsc\" --onSuccess \"node ../../dist/apps/trpc-server/main.js\" -p tsconfig.json"
+				"command": "cross-env NODE_ENV=development npx tsc-watch --compiler \"ttypescript/bin/tsc\" --onSuccess \"node ../../dist/apps/trpc-server/main.js\" -p tsconfig.app.json"
 			}
 		},
 		"build": {
@@ -17,7 +17,7 @@
 				"cwd": "apps/trpc-server",
 				"commands": [
 					"npx rimraf ../../dist/apps/trpc-server",
-					"cross-env NODE_ENV=production npx ttsc -p tsconfig.json"
+					"cross-env NODE_ENV=production npx ttsc -p tsconfig.build.json"
 				],
 				"parallel": false
 			},

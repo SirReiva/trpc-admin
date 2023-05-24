@@ -9,6 +9,7 @@ export default defineConfig(configEnv => {
 		plugins: [react()],
 		build: {
 			outDir: resolve(__dirname, '../../dist/apps/trpc-client'),
+			emptyOutDir: true,
 		},
 		resolve: {
 			alias: {
