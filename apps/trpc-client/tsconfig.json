@@ -4,11 +4,7 @@
 		"noEmit": true,
 		"jsx": "preserve",
 		"incremental": true,
-		"noImplicitReturns": false,
-		"paths": {
-			"@trpc-shared/*": ["dist/libs/trpc-shared/*"],
-			"@trpc-server/trpc/client": ["dist/apps/trpc-server/trpc/client.d.ts"]
-		}
+		"noImplicitReturns": false
 	},
 	"exclude": ["node_modules"],
 	"include": ["**/*.ts", "**/*.tsx"]

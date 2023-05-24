@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { MDXSchema } from '../utils/schemas';
 import { BaseModel } from './BaseModel';
+import { MDXSchema } from '@trpc-shared/utils/schemas';
 
 export const Post = BaseModel.extend({
 	title: z.string(),

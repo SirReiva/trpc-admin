@@ -33,6 +33,11 @@
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"importHelpers": true,
-		"noErrorTruncation": true
+		"noErrorTruncation": true,
+		"paths": {
+			"@trpc-client/*": ["apps/trpc-client/src/*"],
+			"@trpc-server/*": ["apps/trpc-server/src/*"],
+			"@trpc-shared/*": ["libs/trpc-shared/src/*"]
+		}
 	}
 }

@@ -1,42 +1,40 @@
 {
-  "name": "trpc-server",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/trpc-server/src",
-  "projectType": "application",
-  "targets": {
-    "serve": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "apps/trpc-server",
-        "command": "cross-env NODE_ENV=development npx tsc-watch --onSuccess \"node -r tsconfig-paths/register ../../dist/apps/trpc-server/main.js\" -p tsconfig.json"
-      }
-    },
-    "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "apps/trpc-server",
-        "commands": [
-          "npx rimraf ../../dist/apps/trpc-server",
-          "cross-env NODE_ENV=production npx tsc -p tsconfig.json"
-        ],
-        "parallel": false
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "dependencies": true
-        }
-      ]
-    },
-    "start": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "apps/trpc-server",
-        "command": "cross-env NODE_ENV=production node -r tsconfig-paths/register ../../dist/apps/trpc-server/main.js"
-      }
-    }
-  },
-  "tags": [
-    "trpc-server"
-  ]
+	"name": "trpc-server",
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"sourceRoot": "apps/trpc-server/src",
+	"projectType": "application",
+	"targets": {
+		"serve": {
+			"executor": "nx:run-commands",
+			"options": {
+				"cwd": "apps/trpc-server",
+				"command": "cross-env NODE_ENV=development npx tsc-watch --compiler \"ttypescript/bin/tsc\" --onSuccess \"node ../../dist/apps/trpc-server/main.js\" -p tsconfig.json"
+			}
+		},
+		"build": {
+			"executor": "nx:run-commands",
+			"options": {
+				"cwd": "apps/trpc-server",
+				"commands": [
+					"npx rimraf ../../dist/apps/trpc-server",
+					"cross-env NODE_ENV=production npx ttsc -p tsconfig.json"
+				],
+				"parallel": false
+			},
+			"dependsOn": [
+				{
+					"target": "build",
+					"dependencies": true
+				}
+			]
+		},
+		"start": {
+			"executor": "nx:run-commands",
+			"options": {
+				"cwd": "apps/trpc-server",
+				"command": "cross-env NODE_ENV=production node ../../dist/apps/trpc-server/main.js"
+			}
+		}
+	},
+	"tags": ["trpc-server"]
 }

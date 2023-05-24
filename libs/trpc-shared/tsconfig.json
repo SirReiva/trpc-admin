@@ -6,7 +6,10 @@
 			{
 				"transform": "typescript-transform-paths"
 			}
-		]
+		],
+		"paths": {
+			"@trpc-shared/*": ["libs/trpc-shared/src/*"]
+		}
 	},
 	"exclude": ["node_modules"],
 	"include": ["**/*.ts"]

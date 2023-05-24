@@ -1,6 +1,6 @@
+import { enumToTuple } from '@trpc-shared/utils/enum';
+import { PasswordSchema } from '@trpc-shared/utils/schemas';
 import { z } from 'zod';
-import { PasswordSchema } from '../utils/schemas';
-import { enumToTuple } from '../utils/enum';
 
 enum ROLES_ENUM {
 	ADMIN = 'ADMIN',

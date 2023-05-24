@@ -4,7 +4,12 @@
 		"outDir": "../../dist/apps/trpc-server",
 		"paths": {
 			"@trpc-shared/*": ["dist/libs/trpc-shared/*"]
-		}
+		},
+		"plugins": [
+			{
+				"transform": "typescript-transform-paths"
+			}
+		]
 	},
 	"exclude": ["node_modules"],
 	"include": ["src/**/*.ts"]

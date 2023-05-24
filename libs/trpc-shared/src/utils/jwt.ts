@@ -1,5 +1,5 @@
+import { ROLES } from '@trpc-shared/models/BaseAuthModel';
 import { SignJWT, jwtVerify, decodeJwt } from 'jose';
-import { ROLES } from '../models/BaseAuthModel';
 
 export interface TokenPayload {
 	identifier: string;
