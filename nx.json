@@ -1,30 +1,34 @@
 {
-	"npmScope": "trpc-admin",
 	"affected": {
 		"defaultBase": "master"
-	},
-	"implicitDependencies": {
-		"workspace.json": "*",
-		"package.json": {
-			"dependencies": "*",
-			"devDependencies": "*"
-		},
-		"tsconfig.base.json": "*",
-		"tslint.json": "*",
-		".eslintrc.json": "*",
-		"nx.json": "*"
 	},
 	"tasksRunnerOptions": {
 		"default": {
 			"runner": "nx/tasks-runners/default",
 			"options": {
 				"cacheableOperations": ["build", "lint", "test", "e2e"],
-				"parallel": "3"
+				"parallel": 3
 			}
 		}
 	},
 	"workspaceLayout": {
 		"appsDir": "apps",
 		"libsDir": "libs"
+	},
+	"$schema": "./node_modules/nx/schemas/nx-schema.json",
+	"namedInputs": {
+		"default": ["{projectRoot}/**/*", "sharedGlobals"],
+		"sharedGlobals": [
+			"{workspaceRoot}/workspace.json",
+			"{workspaceRoot}/tsconfig.base.json",
+			"{workspaceRoot}/tslint.json",
+			"{workspaceRoot}/nx.json"
+		],
+		"production": ["default"]
+	},
+	"targetDefaults": {
+		"build": {
+			"inputs": ["production", "^production"]
+		}
 	}
 }

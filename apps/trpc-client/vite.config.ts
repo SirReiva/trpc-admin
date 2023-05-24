@@ -7,6 +7,9 @@ export default defineConfig(configEnv => {
 
 	return {
 		plugins: [react()],
+		build: {
+			outDir: resolve(__dirname, '../../dist/apps/trpc-client'),
+		},
 		resolve: {
 			alias: {
 				'@trpc-shared': resolve(__dirname, '../../libs/trpc-shared/src'),
