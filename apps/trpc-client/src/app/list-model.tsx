@@ -188,7 +188,8 @@ const bulidListModel = (model: BaseModelType, name: TrpcModels) => {
 					<Link
 						className='bg-blue-500 px-4 py-2 rounded-md text-white inline-flex justify-center items-center gap-2'
 						to={'/admin/' + name + '/new'}>
-						<FaPlusCircle className='inline' /> Add {name}
+						<FaPlusCircle className='inline' /> Add{' '}
+						<span className='capitalize'>{name}</span>
 					</Link>
 				</div>
 				<Table data={listQuery.data?.data || []} columns={columns} />
