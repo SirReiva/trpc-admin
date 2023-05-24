@@ -14,6 +14,7 @@ export default defineConfig(configEnv => {
 		resolve: {
 			alias: {
 				'@trpc-shared': resolve(__dirname, '../../libs/trpc-shared/src'),
+				'@trpc-client': resolve(__dirname, './src'),
 			},
 		},
 		css: {
