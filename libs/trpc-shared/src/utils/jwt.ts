@@ -9,12 +9,13 @@ export interface TokenPayload {
 
 export const signJWT = (
 	payload: TokenPayload,
-	key: string
+	key: string,
+	duration: string | number
 ): Promise<string> => {
 	const jwtSign = new SignJWT(payload as any);
 	return jwtSign
 		.setProtectedHeader({ alg: 'HS256' })
-		.setExpirationTime('24h')
+		.setExpirationTime(duration)
 		.sign(Buffer.from(key));
 };
 

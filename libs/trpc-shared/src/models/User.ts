@@ -1,9 +1,6 @@
 import { z } from 'zod';
 import { BaseAuthModel } from './BaseAuthModel';
-import { PasswordSchema } from '@trpc-shared/utils/schemas';
 
-export const User = BaseAuthModel.extend({
-	password: PasswordSchema,
-});
+export const User = BaseAuthModel.extend({});
 
 export type UserType = z.infer<typeof User>;

@@ -16,6 +16,20 @@ import { capitalizeFirstLetter } from '@trpc-shared/utils/string';
 
 const t = initTRPC.context<AuthContextType>().create();
 
+const buildObservableForEvent = <T extends BaseModelType>(
+	eventName: string,
+	repository: Repository<z.infer<T>>
+) =>
+	observable<z.infer<T>>(emit => {
+		const onEvent = (data: z.infer<T>) => {
+			emit.next(data);
+		};
+		repository.events.on(eventName, onEvent);
+		return () => {
+			repository.events.off(eventName, onEvent);
+		};
+	});
+
 const loggerMiddleware = t.middleware(async opts => {
 	const start = Date.now();
 
@@ -26,19 +40,23 @@ const loggerMiddleware = t.middleware(async opts => {
 		path: opts.path,
 		type: opts.type,
 		durationMs,
-		input: opts.input,
+		input: opts.input ?? opts.rawInput,
 		output: (result as any).data,
 		error: (result as any).error,
 	};
 
 	if (result.ok) {
+		logger.info(meta, 'OK request:');
 		if (opts.type === 'mutation') {
 			const parts = opts.path.split('.');
-			const action = capitalizeFirstLetter(parts.at(-1) as string);
+			const action = capitalizeFirstLetter(parts.at(-1) as string).replace(
+				'ById',
+				''
+			);
 			const model = parts.at(0) as keyof typeof repositories;
 			const repo = getRepository(model);
 			repo.events.emit(`on${action}`);
-			logger.info(meta, 'OK request:');
+			logger.info(`Event ${action}`);
 		}
 	} else {
 		logger.error(meta, 'Non-OK request');
@@ -62,39 +80,15 @@ const buildModelProcedure = <T extends BaseModelType>(
 	repository: Repository<z.infer<T>>
 ) => {
 	return {
-		onCreate: protectedProcedure.subscription(() => {
-			return observable<z.infer<T>>(emit => {
-				const onAdd = (data: z.infer<T>) => {
-					emit.next(data);
-				};
-				repository.events.on('onCreate', onAdd);
-				return () => {
-					repository.events.off('onCreate', onAdd);
-				};
-			});
-		}),
-		onUpdate: protectedProcedure.subscription(() => {
-			return observable<z.infer<T>>(emit => {
-				const onAdd = (data: z.infer<T>) => {
-					emit.next(data);
-				};
-				repository.events.on('onUpdate', onAdd);
-				return () => {
-					repository.events.off('onUpdate', onAdd);
-				};
-			});
-		}),
-		onDelete: protectedProcedure.subscription(() => {
-			return observable<z.infer<T>>(emit => {
-				const onAdd = (data: z.infer<T>) => {
-					emit.next(data);
-				};
-				repository.events.on('onDelete', onAdd);
-				return () => {
-					repository.events.off('onDelete', onAdd);
-				};
-			});
-		}),
+		onCreate: protectedProcedure.subscription(() =>
+			buildObservableForEvent('onCreate', repository)
+		),
+		onUpdate: protectedProcedure.subscription(() =>
+			buildObservableForEvent('onUpdate', repository)
+		),
+		onDelete: protectedProcedure.subscription(() =>
+			buildObservableForEvent('onDelete', repository)
+		),
 		create: protectedProcedure
 			.input(model)
 			.output(z.void())
@@ -129,8 +123,8 @@ const buildModelProcedure = <T extends BaseModelType>(
 		list: protectedProcedure
 			.input(
 				z.object({
-					page: z.number(),
-					pageSize: z.number(),
+					page: z.number().min(1),
+					pageSize: z.number().min(5).max(100),
 				})
 			)
 			.output(
@@ -141,6 +135,22 @@ const buildModelProcedure = <T extends BaseModelType>(
 				})
 			)
 			.query(({ input }) => repository.list(input.page, input.pageSize)),
+		cursorPagination: protectedProcedure
+			.input(
+				z.object({
+					limit: z.number().min(1).max(100).nullish().default(10),
+					cursor: z.string().nullish(),
+				})
+			)
+			.output(
+				z.object({
+					nextCursor: z.string().nullable(),
+					items: z.array(model),
+				})
+			)
+			.query(({ input }) =>
+				repository.cursorPagination(input.cursor, input.limit)
+			),
 	};
 };
 

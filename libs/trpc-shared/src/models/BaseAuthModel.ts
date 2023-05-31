@@ -8,13 +8,18 @@ enum ROLES_ENUM {
 	READER = 'READER',
 }
 
-export const RoleSchema = z.enum(enumToTuple(ROLES_ENUM));
+export const RoleSchema = z
+	.enum(enumToTuple(ROLES_ENUM))
+	.describe('Role // Role del usuario');
 export type ROLES = z.infer<typeof RoleSchema>;
 
 export const BaseAuthModel = z.object({
 	id: z.string().uuid(),
-	identifier: z.string().min(4),
-	password: PasswordSchema,
+	identifier: z
+		.string()
+		.min(4)
+		.describe('Identificador // Identificador unico de usuario'),
+	password: PasswordSchema.describe('Contraseña // Contraseña'),
 	role: RoleSchema,
 });
 

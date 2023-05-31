@@ -1,15 +1,11 @@
-import { useTsController } from '@ts-react/form';
+import { useDescription, useTsController } from '@ts-react/form';
 
-const SelectField = ({
-	name,
-	label,
-	options,
-}: {
-	options: string[];
-	name: string;
-	label?: string;
-}) => {
-	const { field, error } = useTsController<string>();
+const SelectField = ({ options }: { options: string[] }) => {
+	const { label, placeholder } = useDescription();
+	const {
+		field: { value, onChange, name },
+		error,
+	} = useTsController<string>();
 	return (
 		<>
 			<label
@@ -20,11 +16,9 @@ const SelectField = ({
 			<select
 				id={name}
 				className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
-				value={field.value ? field.value : 'none'}
-				onChange={e => {
-					field.onChange(e.target.value);
-				}}>
-				{!field.value && <option value='none'>Please select...</option>}
+				value={value ? value : ''}
+				onChange={e => onChange(e.target.value)}>
+				<option value=''>{placeholder}</option>
 				{options.map(e => (
 					<option key={e} value={e}>
 						{e}

@@ -6,16 +6,11 @@ import {
 	splitLink,
 	wsLink,
 } from '@trpc/client';
-import { TrpcModels, trpc } from './trpc';
-
-export enum TRPC_MODES {
-	HTTP = 0,
-	WS = 1,
-}
+import { trpc } from './trpc';
 
 export const createClient = (
 	baseUrl: string,
-	linksConfig: Record<TrpcModels, TRPC_MODES>,
+	useWS: boolean,
 	token?: string
 ) => {
 	return trpc.createClient({
@@ -25,10 +20,7 @@ export const createClient = (
 			}),
 			splitLink({
 				condition(op: Operation) {
-					const model = op.path.split('.').shift() as TrpcModels;
-					return (
-						op.type === 'subscription' || Boolean(linksConfig[model] ?? false)
-					);
+					return op.type === 'subscription' || useWS;
 				},
 				false: httpBatchLink({
 					url: 'http:' + baseUrl,

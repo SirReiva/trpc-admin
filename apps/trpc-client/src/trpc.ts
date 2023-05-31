@@ -5,15 +5,6 @@ export const trpc = createTRPCReact<AppRouter>({
 	abortOnUnmount: true,
 });
 
-export type TrpcModels = keyof Omit<
-	typeof trpc,
-	| 'Provider'
-	| 'createClient'
-	| 'useContext'
-	| 'useDehydratedState'
-	| 'useQueries'
->;
-
 export const TrpcProvider = trpc.Provider;
 
 export const isTRPCClientError = (

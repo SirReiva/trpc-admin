@@ -1,33 +1,40 @@
-import { type BaseModelType } from '@trpc-shared/models/BaseModel';
+import { TrpcModels, models } from '@trpc-shared/models';
+import { unWrapAll } from '@trpc-shared/utils/schemas';
 import { createTsForm } from '@ts-react/form';
 import { useNavigate } from 'react-router-dom';
 import uuid from 'uuid-random';
-import { TrpcModels, trpc } from '../trpc';
+import { trpc } from '../trpc';
 import { formMapping } from './form-mapping';
+import { BaseModelType } from '@trpc-shared/models/BaseModel';
 
 const Form = createTsForm(formMapping);
 
-const buildNewFormModel = (model: BaseModelType, name: TrpcModels) => {
+const buildNewFormModel = (name: TrpcModels) => {
+	const model = models[name] as BaseModelType;
 	const idLessModel = model.omit({ id: true });
+
 	return () => {
 		const navigate = useNavigate();
 		const modelCreator = trpc[name].create.useMutation();
 
-		async function onSubmit(data: any) {
+		const onSubmit = async (data: any) => {
 			await modelCreator.mutateAsync({
-				id: uuid(),
 				...data,
+				id: uuid(),
 			});
 			navigate('/admin/' + name);
-		}
+		};
 		const props = Object.entries(idLessModel.shape).reduce(
-			(acc, [name, model]) => {
+			(acc, [name, model]: [string, any]) => {
+				const baseModel = unWrapAll(model);
 				return {
 					...acc,
 					[name]: {
+						...(baseModel.getMeta() || {}),
 						label: name,
 						placeholder: name,
 						options: Object.values((model as any)?.enum || {}),
+						optional: model.isOptional() || model.isNullable(),
 					},
 				};
 			},

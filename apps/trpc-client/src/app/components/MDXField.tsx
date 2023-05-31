@@ -1,11 +1,11 @@
-import { useTsController } from '@ts-react/form';
+import { useDescription, useTsController } from '@ts-react/form';
 import MDEditor from '@uiw/react-md-editor';
 import rehypeSanitize from 'rehype-sanitize';
 
-const MDXField = (props: { name: string; label?: string }) => {
-	const { label, name } = props;
+const MDXField = () => {
+	const { label } = useDescription();
 	const {
-		field: { onChange, value },
+		field: { onChange, value, name },
 		fieldState: { invalid, isDirty },
 		error,
 	} = useTsController<string>();

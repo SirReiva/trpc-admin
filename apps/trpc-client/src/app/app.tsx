@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { TRPC_MODES, createClient } from '../client';
+import { createClient } from '../client';
 import { buildRouter } from '../router';
 import { TrpcProvider, isTRPCClientError } from '../trpc';
 import { useAuth } from './context/authContext';
@@ -15,10 +15,8 @@ import { withNoAuth } from './hoc/withNoAuth';
 import Index from './pages';
 import Admin from './pages/admin';
 import Login from './pages/login';
-import { models } from '@trpc-shared/models';
-import ToastSubscriptoin from './ToastSubscrition';
 
-const routes = buildRouter(models);
+const routes = buildRouter();
 
 const App = () => {
 	const { auth, logOut } = useAuth();
@@ -76,15 +74,7 @@ const App = () => {
 		[queryCache, mutationCache]
 	);
 	const trpcClient = useMemo(
-		() =>
-			createClient(
-				'//localhost:3000/trpc',
-				{
-					post: TRPC_MODES.WS,
-					auth: TRPC_MODES.WS,
-				},
-				auth?.token
-			),
+		() => createClient('//localhost:3000/trpc', true, auth?.token),
 		[auth?.token]
 	);
 
@@ -98,7 +88,6 @@ const App = () => {
 						{...routes}
 					</Route>
 				</Routes>
-				<ToastSubscriptoin />
 			</QueryClientProvider>
 		</TrpcProvider>
 	);

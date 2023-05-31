@@ -15,6 +15,7 @@ import {
 } from '@trpc-server/test/InMemoryRepositories';
 import { z } from 'zod';
 import uuid from 'uuid-random';
+import { MDXSchema, PasswordSchema } from '@trpc-shared/utils/schemas';
 
 export interface Repository<T extends InferBaseModelType> {
 	findById(id: string): MaybePromise<T | null>;
@@ -29,6 +30,10 @@ export interface Repository<T extends InferBaseModelType> {
 	deleteById(id: string): MaybePromise<void>;
 	create(data: T): MaybePromise<void>;
 	updateById(id: string, data: Omit<T, 'id'>): MaybePromise<void>;
+	cursorPagination(
+		cursor: string | undefined | null,
+		pageSize: number | null
+	): MaybePromise<{ items: Array<T>; nextCursor: string | null }>;
 	events: EventEmitter;
 }
 
@@ -56,15 +61,16 @@ const authRepo = new (buildInMemoryAuthRepository<typeof models.auth>())();
 authRepo.create({
 	id: uuid(),
 	identifier: 'admin',
-	password: '1234',
+	password: PasswordSchema.parse('1234'),
 	role: 'ADMIN',
 });
 
 for (let index = 0; index < 1000; index++) {
 	postRepo.create({
 		id: uuid(),
-		description: 'description ' + (index + 1),
-		title: 'title' + (index + 1),
+		description: MDXSchema.parse('description ' + (index + 1)),
+		title: 'title ' + (index + 1),
+		editor: null,
 	});
 }
 

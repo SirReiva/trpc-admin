@@ -1,13 +1,9 @@
-import { useTsController } from '@ts-react/form';
+import { useDescription, useTsController } from '@ts-react/form';
 
-const TextField = (props: {
-	name: string;
-	label?: string;
-	placeholder?: string;
-}) => {
-	const { label, placeholder, name } = props;
+const TextField = () => {
+	const { label, placeholder } = useDescription();
 	const {
-		field: { onChange, value },
+		field: { onChange, value, name },
 		fieldState: { invalid, isDirty },
 		error,
 	} = useTsController<string>();

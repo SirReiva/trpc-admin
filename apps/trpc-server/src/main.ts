@@ -45,6 +45,7 @@ const server = fastify({
 				prefix: TRPC_PLAYGROUND_ENDPOINT,
 			}
 		);
+
 		await server.ready();
 		await server.listen({ port: 3000 });
 		figlet('TRPC-SERVER\n---ready---', (_, r) => console.log(r));

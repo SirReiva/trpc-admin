@@ -1,19 +1,25 @@
-import { BaseModelType } from '@trpc-shared/models/BaseModel';
+import { TrpcModels, models } from '@trpc-shared/models';
+import { InferBaseModelType } from '@trpc-shared/models/BaseModel';
 import { typedObjectEntries } from '@trpc-shared/utils/object';
-import { Link, useSearchParams } from 'react-router-dom';
-import { usePagination, useTable } from 'react-table';
-import { TrpcModels, trpc } from '../trpc';
 import { FaPlusCircle } from 'react-icons/fa';
+import { MdDeleteForever } from 'react-icons/md';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Column, usePagination, useTable } from 'react-table';
+import { trpc } from '../trpc';
 
 const Table = ({
 	columns,
 	data,
+	showActions,
+	onDelete,
 }: {
-	columns: Array<{ Header: string; accessor: string }>;
-	data: Array<any>;
+	columns: Array<Column<InferBaseModelType>>;
+	data: Array<InferBaseModelType>;
+	showActions: boolean;
+	onDelete: (id: string) => void;
 }) => {
 	const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-		useTable(
+		useTable<InferBaseModelType>(
 			{
 				columns,
 				data,
@@ -33,6 +39,11 @@ const Table = ({
 									{column.render('Header')}
 								</th>
 							))}
+							{showActions && (
+								<th className='px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider'>
+									Actions
+								</th>
+							)}
 						</tr>
 					))}
 				</thead>
@@ -50,6 +61,15 @@ const Table = ({
 										</td>
 									);
 								})}
+								{showActions && (
+									<td className='px-6 py-4 whitespace-nowrap text-sm text-center'>
+										<button
+											onClick={() => onDelete(row.original.id)}
+											className='text-red-600 text-xl'>
+											<MdDeleteForever />
+										</button>
+									</td>
+								)}
 							</tr>
 						);
 					})}
@@ -160,7 +180,8 @@ const TablePagination = ({
 	);
 };
 
-const bulidListModel = (model: BaseModelType, name: TrpcModels) => {
+const bulidListModel = (name: TrpcModels) => {
+	const model = models[name];
 	const columns = typedObjectEntries(model.shape)
 		.filter(([name]) => name !== 'id')
 		.map(([name]) => ({
@@ -175,32 +196,48 @@ const bulidListModel = (model: BaseModelType, name: TrpcModels) => {
 
 		const page = parseInt(searchParams.get('page') ?? '1');
 
-		//@ts-ignore
+		//@ts-expect-error
 		const listQuery = trpc[name].list.useQuery({ page, pageSize });
+		const deleteModel = trpc[name].deleteById.useMutation();
 
+		const data = listQuery.data as {
+			total: number;
+			data: Array<InferBaseModelType>;
+		};
+
+		if (data) {
+			const { total, data: items } = data;
+			return (
+				<div className='flex flex-col'>
+					<h2 className='font-medium text-2xl capitalize'>{name}</h2>
+					<div className='block my-4'>
+						<Link
+							className='bg-blue-500 px-4 py-2 rounded-md text-white inline-flex justify-center items-center gap-2'
+							to={'/admin/' + name + '/new'}>
+							<FaPlusCircle className='inline' /> Add{' '}
+							<span className='capitalize'>{name}</span>
+						</Link>
+					</div>
+					<Table
+						data={items}
+						columns={columns}
+						showActions={true}
+						onDelete={async (id: string) => {
+							await deleteModel.mutateAsync({ id });
+							await listQuery.refetch();
+						}}
+					/>
+					<TablePagination
+						totalPages={Math.max(1, Math.ceil(total / pageSize))}
+						currentPage={page}
+						goToPage={page => SetURLSearchParams({ page: page.toString() })}
+					/>
+				</div>
+			);
+		}
 		if (listQuery.isLoading) return <ListLoader />;
 
-		const total = listQuery.data?.total ?? 0;
-
-		return (
-			<div className='flex flex-col'>
-				<h2 className='font-medium text-2xl capitalize'>{name}</h2>
-				<div className='block my-4'>
-					<Link
-						className='bg-blue-500 px-4 py-2 rounded-md text-white inline-flex justify-center items-center gap-2'
-						to={'/admin/' + name + '/new'}>
-						<FaPlusCircle className='inline' /> Add{' '}
-						<span className='capitalize'>{name}</span>
-					</Link>
-				</div>
-				<Table data={listQuery.data?.data || []} columns={columns} />
-				<TablePagination
-					totalPages={Math.max(1, Math.ceil(total / pageSize))}
-					currentPage={page}
-					goToPage={page => SetURLSearchParams({ page: page.toString() })}
-				/>
-			</div>
-		);
+		return null;
 	};
 };
 

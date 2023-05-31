@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { Toaster } from 'react-hot-toast';
 import { BrowserRouter } from 'react-router-dom';
-import 'zod-metadata/register';
 import App from './app/app';
 import AuthProvider from './app/context/authContext';
 import './index.css';
@@ -15,5 +15,6 @@ root.render(
 				<App />
 			</BrowserRouter>
 		</AuthProvider>
+		<Toaster />
 	</React.StrictMode>
 );
