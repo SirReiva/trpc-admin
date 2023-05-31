@@ -8,7 +8,10 @@
 			"executor": "nx:run-commands",
 			"options": {
 				"cwd": "libs/trpc-shared",
-				"commands": ["npx rimraf ../../dist/libs/trpc-shared", "npx ttsc"],
+				"commands": [
+					"npx rimraf ../../dist/libs/trpc-shared",
+					"npx tsc -p tsconfig.json"
+				],
 				"parallel": false
 			}
 		}
