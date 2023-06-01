@@ -1,13 +1,14 @@
-import 'zod-metadata/register';
 import cors from '@fastify/cors';
 import ws from '@fastify/websocket';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import fastify from 'fastify';
-import { getFastifyPlugin } from 'trpc-playground/handlers/fastify';
-import { appRouter } from './trpc/router';
 import figlet from 'figlet';
-import { createContext } from './trpc/context';
 import { install } from 'source-map-support';
+import { getFastifyPlugin } from 'trpc-playground/handlers/fastify';
+import 'zod-metadata/register';
+import { logger } from './logger';
+import { createContext } from './trpc/context';
+import { appRouter } from './trpc/router';
 
 install({
 	environment: 'node',
@@ -18,6 +19,7 @@ const TRPC_PLAYGROUND_ENDPOINT = '/playground';
 
 const server = fastify({
 	maxParamLength: 5000,
+	logger,
 });
 
 (async () => {

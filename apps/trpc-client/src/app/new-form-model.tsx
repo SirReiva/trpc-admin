@@ -6,6 +6,7 @@ import uuid from 'uuid-random';
 import { trpc } from '../trpc';
 import { formMapping } from './form-mapping';
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
+import { useCallback } from 'react';
 
 const Form = createTsForm(formMapping);
 
@@ -17,13 +18,17 @@ const buildNewFormModel = (name: TrpcModels) => {
 		const navigate = useNavigate();
 		const modelCreator = trpc[name].create.useMutation();
 
-		const onSubmit = async (data: any) => {
-			await modelCreator.mutateAsync({
-				...data,
-				id: uuid(),
-			});
-			navigate('/admin/' + name);
-		};
+		const onSubmit = useCallback(
+			async (data: any) => {
+				await modelCreator.mutateAsync({
+					...data,
+					id: uuid(),
+				});
+				navigate('/admin/' + name);
+			},
+			[navigate, modelCreator]
+		);
+
 		const props = Object.entries(idLessModel.shape).reduce(
 			(acc, [name, model]: [string, any]) => {
 				const baseModel = unWrapAll(model);
