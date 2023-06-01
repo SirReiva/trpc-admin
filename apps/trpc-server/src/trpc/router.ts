@@ -1,19 +1,14 @@
 import { TrpcModels, models } from '@trpc-shared/models';
 import { BaseAuthModelType } from '@trpc-shared/models/BaseAuthModel';
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
+import { First } from '@trpc-shared/types';
+import { capitalizeFirstLetter } from '@trpc-shared/utils/string';
 import { TRPCError, initTRPC } from '@trpc/server';
 import { observable } from '@trpc/server/observable';
 import { z } from 'zod';
 import { logger } from '../logger';
 import { AuthContextType } from './context';
-import {
-	AuthRepository,
-	Repository,
-	getRepository,
-	repositories,
-} from './repository';
-import { capitalizeFirstLetter } from '@trpc-shared/utils/string';
-import { First } from '@trpc-shared/types';
+import { AuthRepository, Repository, getRepository } from './repository';
 
 const t = initTRPC.context<AuthContextType>().create();
 
