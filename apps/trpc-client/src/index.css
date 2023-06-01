@@ -1,3 +1,4 @@
+@import 'react-responsive-modal/styles.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

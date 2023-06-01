@@ -10,7 +10,7 @@ import { useCallback } from 'react';
 
 const Form = createTsForm(formMapping);
 
-const buildNewFormModel = (name: TrpcModels) => {
+const NewFormModelBuilder = (name: TrpcModels) => {
 	const model = models[name] as BaseModelType;
 	const idLessModel = model.omit({ id: true });
 
@@ -87,4 +87,4 @@ const buildNewFormModel = (name: TrpcModels) => {
 	};
 };
 
-export default buildNewFormModel;
+export default NewFormModelBuilder;
