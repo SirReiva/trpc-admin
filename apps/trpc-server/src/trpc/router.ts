@@ -1,4 +1,4 @@
-import { models } from '@trpc-shared/models';
+import { TrpcModels, models } from '@trpc-shared/models';
 import { BaseAuthModelType } from '@trpc-shared/models/BaseAuthModel';
 import { BaseModelType } from '@trpc-shared/models/BaseModel';
 import { TRPCError, initTRPC } from '@trpc/server';
@@ -13,9 +13,9 @@ import {
 	repositories,
 } from './repository';
 import { capitalizeFirstLetter } from '@trpc-shared/utils/string';
+import { First } from '@trpc-shared/types';
 
 const t = initTRPC.context<AuthContextType>().create();
-
 
 const loggerMiddleware = t.middleware(async opts => {
 	const start = Date.now();
