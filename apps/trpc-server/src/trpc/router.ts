@@ -16,19 +16,6 @@ import { capitalizeFirstLetter } from '@trpc-shared/utils/string';
 
 const t = initTRPC.context<AuthContextType>().create();
 
-const buildObservableForEvent = <T extends BaseModelType>(
-	eventName: string,
-	repository: Repository<z.infer<T>>
-) =>
-	observable<z.infer<T>>(emit => {
-		const onEvent = (data: z.infer<T>) => {
-			emit.next(data);
-		};
-		repository.events.on(eventName, onEvent);
-		return () => {
-			repository.events.off(eventName, onEvent);
-		};
-	});
 
 const loggerMiddleware = t.middleware(async opts => {
 	const start = Date.now();
@@ -53,9 +40,9 @@ const loggerMiddleware = t.middleware(async opts => {
 				'ById',
 				''
 			);
-			const model = parts.at(0) as keyof typeof repositories;
+			const model = parts.at(0) as TrpcModels;
 			const repo = getRepository(model);
-			repo.events.emit(`on${action}`);
+			repo.events.emit(`on${action}`, opts.ctx.auth?.id, (result as any).data);
 			logger.info(`Event ${action}`);
 		}
 	} else {
@@ -75,19 +62,37 @@ const protectedProcedure = t.procedure
 	.use(loggerMiddleware)
 	.use(authMiddleware);
 
+const buildObservableForEvent = <T extends BaseModelType>(
+	eventName: string,
+	repository: Repository<z.infer<T>>,
+	opts: First<
+		Parameters<First<Parameters<(typeof protectedProcedure)['subscription']>>>
+	>
+) =>
+	observable<z.infer<T>>(emit => {
+		const onEvent = (id: string, data: z.infer<T>) => {
+			if (opts.ctx.auth?.id === id) {
+				emit.next(data);
+			}
+		};
+		repository.events.on(eventName, onEvent);
+		return () => {
+			repository.events.off(eventName, onEvent);
+		};
+	});
 const buildModelProcedure = <T extends BaseModelType>(
 	model: T,
 	repository: Repository<z.infer<T>>
 ) => {
 	return {
-		onCreate: protectedProcedure.subscription(() =>
-			buildObservableForEvent('onCreate', repository)
+		onCreate: protectedProcedure.subscription(opts =>
+			buildObservableForEvent('onCreate', repository, opts)
 		),
-		onUpdate: protectedProcedure.subscription(() =>
-			buildObservableForEvent('onUpdate', repository)
+		onUpdate: protectedProcedure.subscription(opts =>
+			buildObservableForEvent('onUpdate', repository, opts)
 		),
-		onDelete: protectedProcedure.subscription(() =>
-			buildObservableForEvent('onDelete', repository)
+		onDelete: protectedProcedure.subscription(opts =>
+			buildObservableForEvent('onDelete', repository, opts)
 		),
 		create: protectedProcedure
 			.input(model)
