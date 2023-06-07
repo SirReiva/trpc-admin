@@ -1,24 +1,40 @@
 import { TrpcModels, models } from '@trpc-shared/models';
 import { InferBaseModelType } from '@trpc-shared/models/BaseModel';
 import { typedObjectEntries } from '@trpc-shared/utils/object';
+import { TRPCClientError } from '@trpc/client';
+import { UseTRPCQueryResult } from '@trpc/react-query/shared';
+import { useState } from 'react';
 import { FaPlusCircle } from 'react-icons/fa';
-import { MdDeleteForever } from 'react-icons/md';
+import { MdDeleteForever, MdEdit } from 'react-icons/md';
+import { TiTick } from 'react-icons/ti';
+import { RiCloseFill } from 'react-icons/ri';
+import { Modal } from 'react-responsive-modal';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Column, usePagination, useTable } from 'react-table';
 import { trpc } from '../trpc';
-import { Modal } from 'react-responsive-modal';
-import { useState } from 'react';
+import { match } from 'ts-pattern';
+
+const renderCell = (data: string | boolean | number | null | undefined) => {
+	if (data === null || data === undefined) return '';
+	const typeofData = typeof data;
+	if (['number', 'string'].includes(typeofData)) return data;
+
+	if (data) return <TiTick className='text-green-600 scale-150 inline-block' />;
+	return <RiCloseFill className='text-red-600 scale-150 inline-block' />;
+};
 
 const Table = ({
 	columns,
 	data,
 	showActions,
 	onDelete,
+	modelName,
 }: {
 	columns: Array<Column<InferBaseModelType>>;
 	data: Array<InferBaseModelType>;
 	showActions: boolean;
 	onDelete: (id: string) => void;
+	modelName: TrpcModels;
 }) => {
 	const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
 		useTable<InferBaseModelType>(
@@ -59,15 +75,20 @@ const Table = ({
 										<td
 											{...cell.getCellProps()}
 											className='px-6 py-4 whitespace-nowrap text-sm'>
-											{cell.render('Cell')}
+											{renderCell(cell.value)}
 										</td>
 									);
 								})}
 								{showActions && (
-									<td className='px-6 py-4 whitespace-nowrap text-sm text-center'>
+									<td className='px-6 py-4 whitespace-nowrap text-sm justify-center items-center flex gap-2'>
+										<Link
+											to={`/admin/${modelName}/edit/${row.original.id}`}
+											className='text-blue-300 text-xl inline-flex'>
+											<MdEdit />
+										</Link>
 										<button
 											onClick={() => onDelete(row.original.id)}
-											className='text-red-600 text-xl'>
+											className='text-red-600 text-xl inline-flex'>
 											<MdDeleteForever />
 										</button>
 									</td>
@@ -195,87 +216,86 @@ const ListModelBuilder = (name: TrpcModels) => {
 
 	return () => {
 		const [searchParams, SetURLSearchParams] = useSearchParams();
-		const [current, setCurrent] = useState<null | string>(null);
+		const [current, setCurrent] = useState<{
+			loading: boolean;
+			id: string | null;
+		}>({ id: null, loading: false });
 
 		const page = parseInt(searchParams.get('page') ?? '1');
 
-		//@ts-expect-error
-		const listQuery = trpc[name].list.useQuery({ page, pageSize });
+		const listQuery: UseTRPCQueryResult<
+			{ data: Array<InferBaseModelType>; total: number },
+			TRPCClientError<any>
+		> = (trpc[name].list as any).useQuery({ page, pageSize });
+
 		const deleteModel = trpc[name].deleteById.useMutation();
 
-		const data = listQuery.data as {
-			total: number;
-			data: Array<InferBaseModelType>;
-		};
-
-		if (data) {
-			const { total, data: items } = data;
-			return (
-				<>
-					<div className='flex flex-col'>
-						<h2 className='font-medium text-2xl capitalize'>{name}</h2>
-						<div className='block my-4'>
-							<Link
-								className='bg-blue-500 px-4 py-2 rounded-md text-white inline-flex justify-center items-center gap-2'
-								to={'/admin/' + name + '/new'}>
-								<FaPlusCircle className='inline' /> Add{' '}
-								<span className='capitalize'>{name}</span>
-							</Link>
+		return match(listQuery)
+			.with({ isLoading: true }, () => <ListLoader />)
+			.with({ isError: true }, () => null)
+			.with({ isLoading: false, isError: false }, data => {
+				const { total, data: items } = data.data;
+				return (
+					<>
+						<div className='flex flex-col'>
+							<h2 className='font-medium text-2xl capitalize'>{name}</h2>
+							<div className='block my-4'>
+								<Link
+									className='bg-blue-500 px-4 py-2 rounded-md text-white inline-flex justify-center items-center gap-2'
+									to={'/admin/' + name + '/new'}>
+									<FaPlusCircle className='inline' /> Add{' '}
+									<span className='capitalize'>{name}</span>
+								</Link>
+							</div>
+							<Table
+								modelName={name}
+								data={items}
+								columns={columns}
+								showActions={true}
+								onDelete={id => setCurrent({ loading: false, id })}
+							/>
+							<TablePagination
+								totalPages={Math.max(1, Math.ceil(total / pageSize))}
+								currentPage={page}
+								goToPage={page => SetURLSearchParams({ page: page.toString() })}
+							/>
 						</div>
-						<Table
-							data={items}
-							columns={columns}
-							showActions={true}
-							onDelete={setCurrent}
-						/>
-						<TablePagination
-							totalPages={Math.max(1, Math.ceil(total / pageSize))}
-							currentPage={page}
-							goToPage={page => SetURLSearchParams({ page: page.toString() })}
-						/>
-					</div>
-					<Modal
-						open={!!current}
-						onClose={() => setCurrent(null)}
-						center
-						classNames={{
-							modal: 'overflow-visible',
-							closeButton:
-								'-top-4 -right-4 bg-red-500 rounded-full fill-white p-1',
-						}}>
-						<h2 className='text-lg font-semibold'>Delete {name}</h2>
-						<p>
-							Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-							pulvinar risus non risus hendrerit venenatis. Pellentesque sit
-							amet hendrerit risus, sed porttitor quam.
-						</p>
-						<hr className='my-3' />
-						<div className='flex gap-4 justify-end'>
-							<button
-								className='bg-red-500 px-4 py-2 rounded-md text-white inline-flex justify-center items-center gap-2'
-								onClick={async () => {
-									if (!current) return;
-									await deleteModel.mutateAsync({
-										id: current,
-									});
-									await listQuery.refetch();
-									setCurrent(null);
-								}}>
-								<span className='capitalize'>Delete</span>
-							</button>
-							<button
-								className='bg-blue-500 px-4 py-2 rounded-md text-white inline-flex justify-center items-center gap-2'
-								onClick={() => setCurrent(null)}>
-								<span className='capitalize'>Cancel</span>
-							</button>
-						</div>
-					</Modal>
-				</>
-			);
-		}
-		if (listQuery.isLoading) return <ListLoader />;
-
-		return null;
+						<Modal
+							open={!!current.id}
+							onClose={() => setCurrent({ id: null, loading: false })}
+							center
+							classNames={{
+								modal: 'overflow-visible rounded-lg shadow-md',
+								closeButton:
+									'-top-4 -right-4 bg-red-500 rounded-full fill-white p-1',
+							}}>
+							<h2 className='text-lg font-semibold'>Delete {name}</h2>
+							<hr className='my-3' />
+							<div className='flex gap-4 justify-end'>
+								<button
+									className='bg-red-500 px-4 py-2 rounded-md text-white inline-flex justify-center items-center gap-2'
+									onClick={async () => {
+										if (!current.id) return;
+										setCurrent({ id: current.id, loading: true });
+										await deleteModel.mutateAsync({
+											id: current.id,
+										});
+										await listQuery.refetch();
+										setCurrent({ id: null, loading: false });
+									}}>
+									<span className='capitalize'>Delete</span>
+								</button>
+								<button
+									className='bg-blue-500 px-4 py-2 rounded-md text-white inline-flex justify-center items-center gap-2'
+									onClick={() => setCurrent({ id: null, loading: false })}>
+									<span className='capitalize'>Cancel</span>
+								</button>
+							</div>
+						</Modal>
+					</>
+				);
+			})
+			.exhaustive();
 	};
 };
 

@@ -15,6 +15,7 @@ import { withNoAuth } from './hoc/withNoAuth';
 import Index from './pages';
 import Admin from './pages/admin';
 import Login from './pages/login';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const routes = buildRouter();
 
@@ -88,6 +89,7 @@ const App = () => {
 						{...routes}
 					</Route>
 				</Routes>
+				<ReactQueryDevtools initialIsOpen={true} />
 			</QueryClientProvider>
 		</TrpcProvider>
 	);

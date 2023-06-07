@@ -3,6 +3,7 @@ import { Route } from 'react-router-dom';
 import ListModelBuilder from './app/list-model';
 import NewFormModelBuilder from './app/new-form-model';
 import { models } from '@trpc-shared/models';
+import EditModelBuilder from './app/edit-form-model';
 
 export const buildRouter = () => {
 	return typedObjectKeys(models)
@@ -12,6 +13,11 @@ export const buildRouter = () => {
 					key={`${name.toString()}/new`}
 					path={`${name.toString()}/new`}
 					Component={NewFormModelBuilder(name)}
+				/>
+				<Route
+					key={`${name.toString()}/edit`}
+					path={`${name.toString()}/edit/:modelId`}
+					Component={EditModelBuilder(name)}
 				/>
 				<Route
 					key={`${name.toString()}`}

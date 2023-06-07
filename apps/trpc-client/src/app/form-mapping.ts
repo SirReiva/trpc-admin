@@ -12,10 +12,12 @@ import TextField from './components/TextField';
 import TextAreaField from './components/TextAreaField';
 import MDXField from './components/MDXField';
 import ReferenceField from './components/ReferenceField';
+import ToogleField from './components/ToggleField';
 
 export const formMapping = [
 	[PasswordSchema, PasswordField] as const,
 	[z.string(), TextField] as const,
+	[z.boolean(), ToogleField] as const,
 	[RoleSchema, SelectField] as const,
 	[LongTextSchema, TextAreaField] as const,
 	[MDXSchema, MDXField] as const,

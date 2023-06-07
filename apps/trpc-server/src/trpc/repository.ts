@@ -71,6 +71,7 @@ for (let index = 0; index < 1000; index++) {
 		description: MDXSchema.parse('description ' + (index + 1)),
 		title: 'title ' + (index + 1),
 		editor: null,
+		active: false,
 	});
 }
 

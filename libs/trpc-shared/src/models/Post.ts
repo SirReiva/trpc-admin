@@ -8,6 +8,7 @@ export const Post = BaseModel.extend({
 	title: z.string().describe('Título // Título del post'),
 	description: MDXSchema.describe('Descripción // Texto del post'),
 	editor: AuthorReferenceSchema.nullable().describe('Autor // Autor del post'),
+	active: z.boolean().describe('Active'),
 });
 
 export type PostType = z.infer<typeof Post>;

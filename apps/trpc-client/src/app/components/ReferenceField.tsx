@@ -11,7 +11,7 @@ type OptionType = {
 	label: string;
 };
 
-export const loadOptions =
+const loadOptions =
 	(query: UseTRPCInfiniteQueryResult<any, any>) =>
 	async (
 		_search: string,
@@ -61,7 +61,7 @@ const ReferenceField = ({
 		.find(it => it.value === value);
 
 	return (
-		<>
+		<div className='mb-6'>
 			<label
 				htmlFor={name}
 				className='block mb-2 text-sm font-medium text-gray-900 dark:text-white capitalize'>
@@ -75,7 +75,7 @@ const ReferenceField = ({
 				onChange={val => onChange(val?.value)}
 			/>
 			<span>{error?.errorMessage && error.errorMessage}</span>
-		</>
+		</div>
 	);
 };
 
