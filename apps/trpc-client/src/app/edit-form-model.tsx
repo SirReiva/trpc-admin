@@ -20,6 +20,7 @@ const EditModelBuilder = (name: TrpcModels) => {
 	const idLessModel = model.omit({ id: true });
 
 	return () => {
+		const utils = trpc.useContext();
 		let { modelId } = useParams();
 		const modelUpdator = trpc[name].updateById.useMutation();
 
@@ -33,6 +34,15 @@ const EditModelBuilder = (name: TrpcModels) => {
 					},
 					id: modelId as string,
 				});
+				utils[name].getById.setData(
+					{
+						id: modelId as string,
+					},
+					{
+						id: modelId as string,
+						...data,
+					}
+				);
 				navigate('/admin/' + name);
 			},
 			[navigate, modelUpdator]
@@ -60,6 +70,7 @@ const EditModelBuilder = (name: TrpcModels) => {
 		).useQuery({ id: modelId });
 
 		return match(modelQuery)
+			.returnType<React.JSX.Element | null>()
 			.with({ isLoading: true }, () => <Loader />)
 			.with({ isRefetching: true }, () => <Loader />)
 			.with({ isError: true }, () => null)

@@ -9,6 +9,9 @@ import 'zod-metadata/register';
 import { logger } from './logger';
 import { createContext } from './trpc/context';
 import { appRouter } from './trpc/router';
+import { renderTrpcPanel } from 'trpc-panel';
+import { ENV } from './env';
+import mongoose from 'mongoose';
 
 install({
 	environment: 'node',
@@ -37,6 +40,14 @@ const server = fastify({
 			trpcOptions: { router: appRouter, createContext },
 		});
 
+		server.get('/panel', (_, reply) => {
+			return reply.header('Content-Type', 'text/html; charset=utf-8').send(
+				renderTrpcPanel(appRouter, {
+					url: 'http://localhost:3000' + TRPC_ENDPOINT,
+				})
+			);
+		});
+
 		await server.register(
 			await getFastifyPlugin({
 				router: appRouter,
@@ -49,7 +60,8 @@ const server = fastify({
 		);
 
 		await server.ready();
-		await server.listen({ port: 3000 });
+		await mongoose.connect(ENV.DB_URL);
+		await server.listen({ port: ENV.PORT });
 		figlet('TRPC-SERVER\n---ready---', (_, r) => console.log(r));
 	} catch (err) {
 		server.log.error(err);

@@ -9,8 +9,9 @@ import { z } from 'zod';
 import { logger } from '../logger';
 import { AuthContextType } from './context';
 import { AuthRepository, Repository, getRepository } from './repository';
+import { TRPCPanelMeta } from 'trpc-panel';
 
-const t = initTRPC.context<AuthContextType>().create();
+const t = initTRPC.meta<TRPCPanelMeta>().context<AuthContextType>().create();
 
 const loggerMiddleware = t.middleware(async opts => {
 	const start = Date.now();

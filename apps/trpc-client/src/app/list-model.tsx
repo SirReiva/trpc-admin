@@ -231,6 +231,7 @@ const ListModelBuilder = (name: TrpcModels) => {
 		const deleteModel = trpc[name].deleteById.useMutation();
 
 		return match(listQuery)
+			.returnType<React.JSX.Element | null>()
 			.with({ isLoading: true }, () => <ListLoader />)
 			.with({ isError: true }, () => null)
 			.with({ isLoading: false, isError: false }, data => {
